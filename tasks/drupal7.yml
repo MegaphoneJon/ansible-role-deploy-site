@@ -7,9 +7,28 @@
   when: item.item.value.cms == 'Drupal'
   become_user: root
 
+- name: Create a role for monitoring
+  command: "drush --root={{ item.item.value.webroot }} role-create 'monitor'"
+  register: create_monitoring_role
+  become_user: "{{ item.item.value.run_as_user }}"
+  changed_when: create_monitoring_role.rc == 0
+  failed_when: not(create_monitoring_role.rc == 0 or create_monitoring_role.stderr is search("Duplicate entry"))
+
+#FIXME: Test this AND add the monitoring extension to all installs!
+- name: Add remote monitoring permission to monitor role
+  command: "drush --root={{ item.item.value.webroot }} role-add-perm 'monitor' 'remote monitoring'"
+  become_user: "{{ item.item.value.run_as_user }}"
+
   # We don't actually record the password because we don't care what it is.
 - name: Create a user for monitoring
   command: "drush --root={{ item.item.value.webroot }} user-create {{ monitoring_user }} --mail='{{ monitoring_email }}' --password='{{ lookup('password', '/dev/null length=32 chars=ascii_letters') }}'"
+  register: create_monitoring_user
+  become_user: "{{ item.item.value.run_as_user }}"
+  changed_when: create_monitoring_user.rc == 0
+  failed_when: not(create_monitoring_user.rc == 0 or create_monitoring_user.stderr is search("There is already a user account with the email"))
+  
+- name: Add the monitoring role to the monitoring user
+  command: "drush --root={{ item.item.value.webroot }} user-add-role 'monitor' {{ monitoring_user }}"
   register: create_monitoring_user
   become_user: "{{ item.item.value.run_as_user }}"
   changed_when: create_monitoring_user.rc == 0
