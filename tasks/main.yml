@@ -232,3 +232,13 @@
   when: item.item.value.cms == 'Drupal'
   loop_control:
     label: "{{ item.item.key }}"
+
+# Normally this happens on login, but we need to do it now for API key purposes
+- name: Create a CiviCRM contact for the admin user
+  shell: echo '{"contact_type":"Individual", "display_name":"{{ monitoring_email }}","api_key":"'{{ lookup('passwordstore', item.value.client + '/' + hostname + '/' + item.value.bare_url + '/apikey create=true length=32') }}'","email":"{{ monitoring_email }}","options":{"match":"email"}}' | cv api contact.create --in=json
+  args:
+    chdir: "{{ item.value.webroot }}"
+  become_user: "{{ item.value.run_as_user }}"
+  with_dict: "{{ sites }}"
+  loop_control:
+    label: "{{ item.key }}"
