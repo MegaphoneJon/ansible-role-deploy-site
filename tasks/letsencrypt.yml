@@ -1,3 +1,7 @@
+- name: Show the site in question
+  debug:
+    msg: Operating on "{{ item.item.key }}"
+
 - name: Create a challenge for sample.com using a account key from a variable.
   letsencrypt:
     account_key_content: "{{ lookup('passwordstore', 'megaphone/letsencrypt/accountkey') }}"
