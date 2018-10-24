@@ -138,14 +138,6 @@
   loop_control:
     label: "{{ item.key }}"
 
-- name: Deal with the Ansible ACL bug
-  command: setfacl -R -m user:www-data:rx,d:user:www-data:rx "{{ item.value.webroot }}"
-  changed_when: false
-  become_user: root
-  with_dict: "{{ sites }}"
-  loop_control:
-    label: "{{ item.key }}"
-
 # MySQL
 - name: Create CMS database
   mysql_db:
