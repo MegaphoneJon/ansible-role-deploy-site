@@ -1,3 +1,7 @@
+- name: Show the site in question
+  debug:
+    msg: Operating on "{{ item.item.key }}"
+
 - name: Check out civicrm-setup
   git:
     repo: https://github.com/civicrm/civicrm-setup
@@ -19,6 +23,19 @@
   when: item.item.value.civicrm == 'Yes'
   become_user: "{{ item.item.value.run_as_user }}"
 
+- name: Create CiviCRM extensions/templates/php folder.
+  file:
+    path: "{{ item.item.value.webroot }}/{{ filepath }}"
+    state: directory
+  loop_control:
+    loop_var: filepath
+  with_items:
+    - "{{ item.item.value.civicrm_custom_path }}"
+    - "{{ item.item.value.civicrm_custom_path }}/templates"
+    - "{{ item.item.value.civicrm_custom_path }}/extensions"
+  when: item.item.value.civicrm == 'Yes'
+  become_user: "{{ item.item.value.run_as_user }}"
+
 - name: Set file permissions
   file:
     dest: "{{ item.item.value.webroot }}"
@@ -34,6 +51,16 @@
     chdir: "{{ item.item.value.civiroot }}"
     creates: "{{ item.item.value.civicrm_settings_php_path }}/civicrm.settings.php"
   become_user: "{{ item.item.value.run_as_user }}"
+
+# This one contains any customizations we might want, like extensions directory.
+- name: Add civicrm.settings.php
+  template:
+    src: templates/civicrm.settings.j2
+    dest: "{{ item.item.value.civicrm_settings_php_path }}/civicrm.settings.php"
+    owner: "{{ item.item.value.run_as_user }}"
+    group: "{{ item.item.value.run_as_user }}"
+    mode: 0660
+  become_user: root
 
 - name: git init
   command:  git init {{ item.item.value.webroot }}
@@ -71,6 +98,29 @@
   failed_when: not(commit_result.rc == 0 or commit_result.stdout == 'On branch master\nnothing to commit, working tree clean')
   become_user: "{{ item.item.value.run_as_user }}"
 
+- name: Add Megaphone monitoring
+  command: "git submodule add https://github.com/MegaphoneJon/com.megaphonetech.monitoring {{ item.item.value.webroot }}/{{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
+  args:
+    chdir: "{{ item.item.value.webroot }}"
+    creates: "{{ item.item.value.webroot }}/{{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
+  become_user: "{{ item.item.value.run_as_user }}"
+
+# it seems like running git commands in Ansible is buggy, leads to files being owned by root.
+- name: fix git permissions
+  file:
+    dest: "{{ item.item.value.webroot }}/.git"
+    owner: "{{ item.item.value.run_as_user }}"
+    group: "{{ item.item.value.run_as_user }}"
+    recurse: yes
+    mode: ug=rwX
+  become_user: root
+
+- name: Enable Megaphone monitoring
+  command: "cv en com.megaphonetech.monitoring"
+  args:
+    chdir: "{{ item.item.value.webroot }}"
+  become_user: "{{ item.item.value.run_as_user }}"
+
 - name: Set file permissions (again)
   file:
     dest: "{{ item.item.value.webroot }}"
@@ -79,6 +129,23 @@
     recurse: yes
     mode: ug=rwX
   become_user: root
+
+- name: git add
+  command: git add -A
+  args:
+    chdir: "{{ item.item.value.webroot }}"
+  register: add_result
+  changed_when: add_result.stdout != ''
+  become_user: "{{ item.item.value.run_as_user }}"
+
+- name: git commit
+  command: git commit -m "Megaphone monitoring extension (via Ansible)"
+  args:
+    chdir: "{{ item.item.value.webroot }}"
+  register: commit_result
+  changed_when: commit_result.rc == 0
+  failed_when: not(commit_result.rc == 0 or commit_result.stdout == 'On branch master\nnothing to commit, working tree clean')
+  become_user: "{{ item.item.value.run_as_user }}"
 
 - name: git push
   command: git push --set-upstream origin master
