@@ -105,6 +105,13 @@
     creates: "{{ item.item.value.webroot }}/{{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
   become_user: "{{ item.item.value.run_as_user }}"
 
+- name: ignore file perms on Megaphone monitoring
+  git_config:
+    name: core.filemode
+    scope: local
+    repo: "{{ item.item.value.webroot }}/{{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
+    value: false
+
 # it seems like running git commands in Ansible is buggy, leads to files being owned by root.
 - name: fix git permissions
   file:
@@ -155,3 +162,4 @@
   when: item.item.value.internal_repo == "1" and (item.item.value.git_repo_push_url is search("ssh://"))
   changed_when: push_result.rc == 0
   failed_when: not(push_result.rc == 0)
+  become_user: "{{ item.item.value.run_as_user }}"
