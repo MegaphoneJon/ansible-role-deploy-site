@@ -122,12 +122,6 @@
     mode: ug=rwX
   become_user: root
 
-- name: Enable Megaphone monitoring
-  command: "cv en com.megaphonetech.monitoring"
-  args:
-    chdir: "{{ item.item.value.webroot }}"
-  become_user: "{{ item.item.value.run_as_user }}"
-
 - name: Set file permissions (again)
   file:
     dest: "{{ item.item.value.webroot }}"
