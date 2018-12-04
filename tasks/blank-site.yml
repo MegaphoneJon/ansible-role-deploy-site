@@ -99,10 +99,10 @@
   become_user: "{{ item.item.value.run_as_user }}"
 
 - name: Add Megaphone monitoring
-  command: "git submodule add https://github.com/MegaphoneJon/com.megaphonetech.monitoring {{ item.item.value.webroot }}/{{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
+  command: "git submodule add https://github.com/MegaphoneJon/com.megaphonetech.monitoring.git {{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
   args:
     chdir: "{{ item.item.value.webroot }}"
-    creates: "{{ item.item.value.webroot }}/{{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
+    creates: "{{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
   become_user: "{{ item.item.value.run_as_user }}"
 
 - name: ignore file perms on Megaphone monitoring
@@ -113,18 +113,18 @@
     value: false
 
 # it seems like running git commands in Ansible is buggy, leads to files being owned by root.
-- name: fix git permissions
+- name: Set file permissions (again)
   file:
-    dest: "{{ item.item.value.webroot }}/.git"
+    dest: "{{ item.item.value.webroot }}"
     owner: "{{ item.item.value.run_as_user }}"
     group: "{{ item.item.value.run_as_user }}"
     recurse: yes
     mode: ug=rwX
   become_user: root
 
-- name: Set file permissions (again)
+- name: fix git permissions
   file:
-    dest: "{{ item.item.value.webroot }}"
+    dest: "{{ item.item.value.webroot }}/.git"
     owner: "{{ item.item.value.run_as_user }}"
     group: "{{ item.item.value.run_as_user }}"
     recurse: yes
