@@ -96,8 +96,40 @@
   with_dict: "{{ sites }}"
   register: create_gogs_repo
   failed_when: not(create_gogs_repo.status == 201 or create_gogs_repo.status == 422 or create_gogs_repo.status == 403)
+  when: item.value.internal_repo == '1'
   loop_control:
     label: "{{ item.key }}"
+  tags: debug
+
+- name: Check if branches exist - if not, this repo is empty
+  uri:
+    url: https://git.megaphonetech.com/api/v1/repos/{{ item.value.git_repo_owner }}/{{ item.value.git_repo_name }}/branches
+    method: GET
+    headers:
+      Authorization: token {{ lookup('passwordstore', 'megaphone/gogs/api') }}
+    body:
+      name: "{{ item.value.git_repo_name }}"
+      description: "Repo for {{ item.value.git_repo_name }}"
+      private: true
+    body_format: json
+  when: item.value.internal_repo == '1'
+  with_dict: "{{ sites }}"
+  register: repos
+  loop_control:
+    label: "{{ item.key }}"
+  tags: debug
+
+- name: deleteme
+  debug: var=item.json
+  with_items: "{{ repos.results }}"
+  when: item.json | length > 0
+  tags: debug
+
+- name: deleteme2
+  debug: var=item.item.value.internal_repo
+  with_items: "{{ repos.results }}"
+  tags: debug
+
 
 # Tasks for blank sites regardless of CMS
 - name: Create deploy keys
@@ -201,36 +233,36 @@
   loop_control:
     label: "{{ item.item.key }}"
 
-# If create_gogs_repo.results.status is 422, the repo existed already.  If 201, it was just created.
+# If repos.item.json is > 0, then branches exist in the gitea repo.
 # Build a new WP site
 - name: Create fresh WordPress sites
   include_tasks: blank-wp.yml
-  with_items: "{{ create_gogs_repo.results }}"
-  when: (item.status == 201 or item.item.value.internal_repo != "1") and item.item.value.cms == 'WordPress'
+  with_items: "{{ repos.results }}"
+  when: ( item.item.value.internal_repo != "1" or item.json | length == 0) and item.item.value.cms == 'WordPress'
   loop_control:
     label: "{{ item.item.key }}"
 
 # Build a new D7 site
 - name: Create fresh Drupal 7 sites
   include_tasks: blank-drupal7.yml
-  with_items: "{{ create_gogs_repo.results }}"
-  when: (item.status == 201 or item.item.value.internal_repo != "1") and item.item.value.cms == 'Drupal'
+  with_items: "{{ repos.results }}"
+  when: ( item.item.value.internal_repo != "1" or item.json | length == 0) and item.item.value.cms == 'Drupal'
   loop_control:
     label: "{{ item.item.key }}"
 
 # Tasks for blank sites regardless of CMS
 - name: Tasks for all fresh sites
   include_tasks: blank-site.yml
-  with_items: "{{ create_gogs_repo.results }}"
-  when: (item.status == 201 or item.item.value.internal_repo != "1")
+  with_items: "{{ repos.results }}"
+  when: ( item.item.value.internal_repo != "1" or item.json | length == 0)
   loop_control:
     label: "{{ item.item.key }}"
 
 # For internal (git.megaphonetech.com) repos
 - name: Build sites from existing git repo
   include_tasks: internal-git.yml
-  with_items: "{{ create_gogs_repo.results }}"
-  when: (item.status == 422 or item.status == 403) and item.item.value.internal_repo == "1"
+  with_items: "{{ repos.results }}"
+  when: (item.item.value.internal_repo == "1" and item.json | length > 0)
   loop_control:
     label: "{{ item.item.key }}"
 
