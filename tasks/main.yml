@@ -119,12 +119,6 @@
     label: "{{ item.key }}"
   tags: debug
 
-- name: deleteme
-  debug: var=item.json
-  with_items: "{{ repos.results }}"
-  when: item.json | length > 0
-  tags: debug
-
 - name: deleteme2
   debug: var=item.item.value.internal_repo
   with_items: "{{ repos.results }}"
