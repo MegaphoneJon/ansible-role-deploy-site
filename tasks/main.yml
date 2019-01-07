@@ -43,10 +43,9 @@
     - "{{ grouplist }}"
 
 - name: Create a php-fpm pool
-  # How do we make that "7.0" below a variable?
   template:
     src: templates/php-pool.j2
-    dest: /etc/php/7.0/fpm/pool.d/{{ item.value.run_as_user }}.conf
+    dest: /etc/php/{{ php_version }}/fpm/pool.d/{{ item.value.run_as_user }}.conf
   with_dict: "{{ sites }}"
   notify: restart php-fpm
   loop_control:
