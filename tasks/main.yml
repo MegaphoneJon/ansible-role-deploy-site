@@ -118,12 +118,6 @@
     label: "{{ item.key }}"
   tags: debug
 
-- name: deleteme2
-  debug: var=item.item.value.internal_repo
-  with_items: "{{ repos.results }}"
-  tags: debug
-
-
 # Tasks for blank sites regardless of CMS
 - name: Create deploy keys
   include_tasks: deploy-keys.yml

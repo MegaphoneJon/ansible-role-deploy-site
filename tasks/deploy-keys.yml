@@ -38,7 +38,7 @@
 # Deploy keys are read/write on trusted servers, read-only otherwise.
 - name: Set up deploy keys on gitea
   uri:
-    url: https://git.megaphonetech.com/api/v1/repos/{{ item.item.value.git_repo_owner + '/' + item.item.value.git_repo_name }}/keys
+    url: "https://git.megaphonetech.com/api/v1/repos/{{ item.item.value.git_repo_owner }}/{{ item.item.value.git_repo_name }}/keys"
     method: POST
     body_format: json
     body:
@@ -47,6 +47,7 @@
       read_only: "{{ (item.item.value.trusted_server == '1') | ternary(false, true) }}"
     headers:
       Authorization: token {{ lookup('passwordstore', 'megaphone/gogs/api') }}
+  when: item.item.value.internal_repo == '1'
   register: gogs_result
   changed_when: gogs_result.status == 201
   failed_when: gogs_result.status != 201 and not (gogs_result.json is defined and gogs_result.json.message is defined and gogs_result.json.message is search("public key already exists"))
