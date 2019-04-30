@@ -95,7 +95,7 @@
     chdir: "{{ item.item.value.webroot }}"
   register: commit_result
   changed_when: commit_result.rc == 0
-  failed_when: 'commit_result != 0 and not "nothing to commit, working directory clean" in commit_result.stdout_lines'
+  failed_when: 'commit_result.rc != 0 and not "nothing to commit, working directory clean" in commit_result.stdout_lines'
   become_user: "{{ item.item.value.run_as_user }}"
 
 - name: Add Megaphone monitoring
@@ -145,7 +145,7 @@
     chdir: "{{ item.item.value.webroot }}"
   register: commit_result
   changed_when: commit_result.rc == 0
-  failed_when: 'commit_result != 0 and not "nothing to commit, working directory clean" in commit_result.stdout_lines'
+  failed_when: 'commit_result.rc != 0 and not "nothing to commit, working directory clean" in commit_result.stdout_lines'
   become_user: "{{ item.item.value.run_as_user }}"
 
 - name: git push
