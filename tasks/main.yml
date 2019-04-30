@@ -60,6 +60,7 @@
   notify: restart apache
   loop_control:
     label: "{{ item.key }}"
+  tags: debug
 
 - name: Enable the site (Apache)
   file:
@@ -98,7 +99,6 @@
   when: item.value.internal_repo == '1'
   loop_control:
     label: "{{ item.key }}"
-  tags: debug
 
 - name: Check if branches exist - if not, this repo is empty
   uri:
@@ -116,7 +116,6 @@
   register: repos
   loop_control:
     label: "{{ item.key }}"
-  tags: debug
 
 # Tasks for blank sites regardless of CMS
 - name: Create deploy keys
@@ -136,6 +135,25 @@
   with_dict: "{{ sites }}"
   loop_control:
     label: "{{ item.key }}"
+
+- name: Make sure we can use htpasswd module
+  apt: "pkg=python-passlib state=present"
+  tags: debug
+
+- name: Add basic auth on test sites
+  htpasswd:
+    path: "{{ item.value.webroot }}/htpasswd"
+    name: megaphone
+    password: megaphone
+    owner: root
+    group: www-data
+    mode: 0640
+  become_user: root
+  with_dict: "{{ sites }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: item.value.env == 'Test'
+  tags: debug
 
 - name: Grant www-data user access to the parent folder
   acl:
