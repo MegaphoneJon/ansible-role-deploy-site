@@ -38,3 +38,35 @@
   become_user: "{{ item.item.value.run_as_user }}"
   changed_when: create_monitoring_user.rc == 0
   failed_when: not(create_monitoring_user.rc == 0 or create_monitoring_user.stderr is search("There is already a user account with the email"))
+
+- name: Expand the number of log messages to keep
+  command: "drush --root={{ item.item.value.webroot }} vset dblog_row_limit 1000000"
+  become_user: "{{ item.item.value.run_as_user }}"
+
+- name: Don't print errors to screen
+  command: "drush --root={{ item.item.value.webroot }} vset error_level 0"
+  become_user: "{{ item.item.value.run_as_user }}"
+
+- name: Enable role_watchdog
+  command: "drush --root={{ item.item.value.webroot }} en -y role_watchdog"
+  args:
+    creates: "{{ item.item.value.webroot }}/sites/all/modules/role_watchdog"
+  become_user: "{{ item.item.value.run_as_user }}"
+
+- name: Enable clear_password_field
+  command: "drush --root={{ item.item.value.webroot }} en -y clear_password_field"
+  args:
+    creates: "{{ item.item.value.webroot }}/sites/all/modules/clear_password_field"
+  become_user: "{{ item.item.value.run_as_user }}"
+
+- name: Enable hide_php_fatal_error 
+  command: "drush --root={{ item.item.value.webroot }} en -y hide_php_fatal_error"
+  args:
+    creates: "{{ item.item.value.webroot }}/sites/all/modules/hide_php_fatal_error"
+  become_user: "{{ item.item.value.run_as_user }}"
+
+- name: Enable remove_generator 
+  command: "drush --root={{ item.item.value.webroot }} en -y remove_generator"
+  args:
+    creates: "{{ item.item.value.webroot }}/sites/all/modules/remove_generator"
+  become_user: "{{ item.item.value.run_as_user }}"
