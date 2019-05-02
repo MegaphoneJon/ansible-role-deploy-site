@@ -6,8 +6,15 @@
   RedirectMatch 404 /\.git
 <Directory "{{ item.value.webroot }}">
   AllowOverride All
-  Require all granted
   Options -Indexes
+{% if item.value.env == 'Test' %}
+  AuthType Basic
+  AuthName "Restricted Content"
+  AuthUserFile {{ item.value.webroot }}/htpasswd
+  Require valid-user
+{% else %}
+  Require all granted
+{% endif %}
 </Directory>
 </VirtualHost>
 
