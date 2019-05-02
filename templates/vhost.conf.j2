@@ -12,6 +12,9 @@
   AuthName "Restricted Content"
   AuthUserFile {{ item.value.webroot }}/htpasswd
   Require valid-user
+  Order allow,deny
+  Allow from 127.0.0.0/255.0.0.0 ::1/128
+  satisfy any
 {% else %}
   Require all granted
 {% endif %}
