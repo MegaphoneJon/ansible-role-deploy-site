@@ -26,7 +26,7 @@
 
   # We don't actually record the password because we don't care what it is.
 - name: Create a user for monitoring
-  command: "drush --root={{ item.item.value.webroot }} user-create {{ monitoring_user }} --mail='{{ monitoring_email }}' --password='{{ lookup('password', '/dev/null length=32 chars=ascii_letters') }}'"
+  command: "drush --root={{ item.item.value.webroot }} user-create {{ monitoring_user }} --mail='{{ monitoring_email }}' --password='{{ lookup('password', '/dev/null length=32 nosymbols=yes') }}'"
   register: create_monitoring_user
   become_user: "{{ item.item.value.run_as_user }}"
   changed_when: create_monitoring_user.rc == 0
