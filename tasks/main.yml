@@ -60,7 +60,6 @@
   notify: restart apache
   loop_control:
     label: "{{ item.key }}"
-  tags: debug
 
 - name: Enable the site (Apache)
   file:
@@ -69,16 +68,6 @@
     state: link
   with_dict: "{{ sites }}"
   notify: restart apache
-  loop_control:
-    label: "{{ item.key }}"
-
-- name: Update /etc/hosts
-  lineinfile:
-    path: /etc/hosts
-    regexp: "^127\\.0\\.0\\.1 {{ item.value.bare_url }}"
-    line: "127.0.0.1 {{ item.value.bare_url }}"
-  become_user: root
-  with_dict: "{{ sites }}"
   loop_control:
     label: "{{ item.key }}"
 
@@ -99,6 +88,7 @@
   when: item.value.internal_repo == '1'
   loop_control:
     label: "{{ item.key }}"
+  tags: debug
 
 - name: Check if branches exist - if not, this repo is empty
   uri:
@@ -233,10 +223,11 @@
     label: "{{ item.key }}"
 
 - name: Create a site key if one doesn't exist.
-  set_fact: dontcare="{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/sitekey create=true length=32 chars=ascii_letters,digits') }}"
+  set_fact: dontcare="{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/sitekey create=true length=32 nosymbols=yes') }}"
   with_items: "{{ create_gogs_repo.results }}"
   loop_control:
     label: "{{ item.item.key }}"
+  tags: debug
 
 # If repos.item.json is > 0, then branches exist in the gitea repo.
 # Build a new WP site
