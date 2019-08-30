@@ -84,7 +84,7 @@
     body_format: json
   with_dict: "{{ sites }}"
   register: create_gogs_repo
-  failed_when: not(create_gogs_repo.status == 201 or create_gogs_repo.status == 422 or create_gogs_repo.status == 403)
+  failed_when: not(create_gogs_repo.status == 201 or create_gogs_repo.status == 422 or create_gogs_repo.status == 403 or create_gogs_repo.status == 409)
   when: item.value.internal_repo == '1'
   loop_control:
     label: "{{ item.key }}"
