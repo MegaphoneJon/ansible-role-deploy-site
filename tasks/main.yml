@@ -88,7 +88,6 @@
   when: item.value.internal_repo == '1'
   loop_control:
     label: "{{ item.key }}"
-  tags: debug
 
 - name: Check if branches exist - if not, this repo is empty
   uri:
@@ -128,7 +127,6 @@
 
 - name: Make sure we can use htpasswd module
   apt: "pkg=python-passlib state=present"
-  tags: debug
 
 - name: Add basic auth on test sites
   htpasswd:
@@ -143,7 +141,6 @@
   loop_control:
     label: "{{ item.key }}"
   when: item.value.env == 'Test'
-  tags: debug
 
 - name: Grant www-data user access to the parent folder
   acl:
@@ -227,7 +224,6 @@
   with_items: "{{ create_gogs_repo.results }}"
   loop_control:
     label: "{{ item.item.key }}"
-  tags: debug
 
 # If repos.item.json is > 0, then branches exist in the gitea repo.
 # Build a new WP site
