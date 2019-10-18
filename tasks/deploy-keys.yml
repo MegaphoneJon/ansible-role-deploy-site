@@ -50,5 +50,5 @@
   when: item.item.value.internal_repo == '1'
   register: gogs_result
   changed_when: gogs_result.status == 201
-  failed_when: gogs_result.status != 201 and not (gogs_result.json is defined and gogs_result.json.message is defined and gogs_result.json.message is search("public key already exists"))
+  failed_when: gogs_result.status != 201 and not (gogs_result.json is defined and gogs_result.json.message is defined and gogs_result.json.message is search("This key has already been added"))
   become_user: "{{ item.item.value.run_as_user }}"
