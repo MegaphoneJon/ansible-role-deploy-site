@@ -46,7 +46,7 @@
   become_user: root
 
 - name: Run cv core:install
-  command: "cv core:install --db=mysql://{{ item.item.value.db_user }}:{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }}@localhost/{{ item.item.value.crm_db_name }} --cms-base-url={{ item.item.value.primary_url }}"
+  command: "cv -n core:install --db=mysql://{{ item.item.value.db_user }}:{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }}@localhost/{{ item.item.value.crm_db_name }} --cms-base-url={{ item.item.value.primary_url }}"
   args:
     chdir: "{{ item.item.value.civiroot }}"
     creates: "{{ item.item.value.civicrm_settings_php_path }}/civicrm.settings.php"
