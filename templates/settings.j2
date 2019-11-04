@@ -249,9 +249,9 @@ $databases = array (
   array (
     'default' => 
     array (
-      'database' => '{{ item.item.value.cms_db_name }}',
-      'username' => '{{ item.item.value.db_user }}',
-      'password' => '{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }}',
+      'database' => '{{ cms_db_name }}',
+      'username' => '{{ db_user }}',
+      'password' => '{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}',
       'host' => 'localhost',
       'port' => '',
       'driver' => 'mysql',
@@ -645,6 +645,6 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
 $databases['default']['default']['prefix']= array(
   'default' => '',
 {% for table_name in civi_table_names.stdout_lines %}
-'{{ table_name }}'                              => '`{{ item.item.value.crm_db_name }}`.',
+'{{ table_name }}'                              => '`{{ crm_db_name }}`.',
 {% endfor %}
 );
