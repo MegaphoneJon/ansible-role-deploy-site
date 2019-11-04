@@ -16,6 +16,9 @@
     chdir: "{{ webroot }}"
     creates: "{{ webroot }}/sites/default/settings.php"
   become_user: "{{ run_as_user }}"
+  notify:
+    - restart apache
+    - restart php-fpm
 
 - name: Set the D7 .gitignore
   copy:

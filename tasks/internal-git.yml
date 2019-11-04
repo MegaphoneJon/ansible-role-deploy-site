@@ -1,54 +1,50 @@
-- name: Show the site in question
-  debug:
-    msg: Operating on "{{ item.item.key }}"
-
 - name: clone an existing site
   git:
-    repo: "{{ item.item.value.git_repo_url }}"
-    dest: "{{ item.item.value.gitroot }}"
+    repo: "{{ git_repo_url }}"
+    dest: "{{ gitroot }}"
     version: master
     umask: "0007"
     track_submodules: no
-  become_user: "{{ item.item.value.run_as_user }}"
+  become_user: "{{ run_as_user }}"
 
 - name: Create CiviCRM uploads folder
   file:
-    path: "{{ item.item.value.civicrm_settings_php_path }}"
+    path: "{{ civicrm_settings_php_path }}"
     state: directory
-  when: item.item.value.civicrm == 'Yes'
-  become_user: "{{ item.item.value.run_as_user }}"
+  when: civicrm == 'Yes'
+  become_user: "{{ run_as_user }}"
 
 # MySQL restore
 - name: Create sql-dumps folder
   file:
-    owner: "{{ item.item.value.run_as_user }}"
-    group: "{{ item.item.value.run_as_user }}"
-    path: "{{ item.item.value.webroot }}/../sql-dumps"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+    path: "{{ webroot }}/../sql-dumps"
     state: directory
     mode: 02770
   become_user: root
 
 - name: Check if db dump files already exist
   stat:
-    path: "{{ item.item.value.webroot }}/../sql-dumps/{{ item.item.value.canonical_cms_db_name }}.sql"
+    path: "{{ webroot }}/../sql-dumps/{{ canonical_cms_db_name }}.sql"
   register: db_dump
 
 # Return yes when we FAIL the assertion, meaning "restore a db backup".
 - name: Update the dump if a canonical db exists unless a dump already exists and is < 24hrs old
   assert:
     that:
-      - "item.item.value.canonical_hostname is none or (db_dump.stat.exists == true and (ansible_date_time.epoch|int - db_dump.stat.mtime) < (60 * 60 * 24))"
+      - "canonical_hostname is none or (db_dump.stat.exists == true and (ansible_date_time.epoch|int - db_dump.stat.mtime) < (60 * 60 * 24))"
     msg: "yes"
   failed_when: false
   register: restore_db_backup
 
 # This is so fucking ugly. Newer versions of borgbackup eliminate the need for piping to tail and cut, but we probably won't have them until Debian 10 ships.
 - name: Get the latest backup archive name
-  shell: borg list --remote-path /usr/local/bin/borg1/borg1 {{ rsyncnet_user }}@{{ rsyncnet_server }}:{{ item.item.value.canonical_server_client + '-' + item.item.value.canonical_hostname }} | tail -n1 | cut -f 1 -d ' '
+  shell: borg list --remote-path /usr/local/bin/borg1/borg1 {{ rsyncnet_user }}@{{ rsyncnet_server }}:{{ canonical_server_client + '-' + canonical_hostname }} | tail -n1 | cut -f 1 -d ' '
   environment:
-    BORG_PASSPHRASE: "{{ lookup('passwordstore', item.item.value.canonical_server_client + '/' + item.item.value.canonical_hostname + '/borg/remote') }}"
+    BORG_PASSPHRASE: "{{ lookup('passwordstore', canonical_server_client + '/' + canonical_hostname + '/borg/remote') }}"
   args:
-    chdir: "{{ item.item.value.webroot }}/../sql-dumps"
+    chdir: "{{ webroot }}/../sql-dumps"
   register: archive_name
   changed_when: false
   when: restore_db_backup.msg == "yes"
@@ -56,14 +52,14 @@
 
 # Download the borg backup of the db dump if we need an update and the borg backup exists.
 - name: Download the latest copy of the database
-  shell: borg extract --strip-components 4 --remote-path /usr/local/bin/borg1/borg1 {{ rsyncnet_user }}@{{ rsyncnet_server }}:{{ item.item.value.canonical_server_client + '-' + item.item.value.canonical_hostname }}::{{ archive_name.stdout }} var/backups/mysql/sqldump/{{ db_name }}
+  shell: borg extract --strip-components 4 --remote-path /usr/local/bin/borg1/borg1 {{ rsyncnet_user }}@{{ rsyncnet_server }}:{{ canonical_server_client + '-' + canonical_hostname }}::{{ archive_name.stdout }} var/backups/mysql/sqldump/{{ db_name }}
   args:
-    chdir: "{{ item.item.value.webroot }}/../sql-dumps"
+    chdir: "{{ webroot }}/../sql-dumps"
   environment:
-    BORG_PASSPHRASE: "{{ lookup('passwordstore', item.item.value.canonical_server_client + '/' + item.item.value.canonical_hostname + '/borg/remote') }}"
+    BORG_PASSPHRASE: "{{ lookup('passwordstore', canonical_server_client + '/' + canonical_hostname + '/borg/remote') }}"
   with_items:
-    - "{{ item.item.value.canonical_crm_db_name }}.sql"
-    - "{{ item.item.value.canonical_cms_db_name }}.sql"
+    - "{{ canonical_crm_db_name }}.sql"
+    - "{{ canonical_cms_db_name }}.sql"
   register: db_downloaded
   loop_control:
     loop_var: db_name
@@ -73,52 +69,52 @@
 # Don't do these other steps if a) there's no db backup in borg b) the db is already downloaded.
 # FIXME: We don't have a way of telling whether the db dump has been loaded or not, which is what we really need.  Figure out a command to determine that, then change the "when" on the next 3 tasks.
 - name: Remove definers from Civi db
-  command: perl -pi -e 's#\/\*\!5001. DEFINER=`.*`@`.*?\*\/##g' {{ item.item.value.canonical_crm_db_name }}.sql
+  command: perl -pi -e 's#\/\*\!5001. DEFINER=`.*`@`.*?\*\/##g' {{ canonical_crm_db_name }}.sql
   args:
-    chdir: "{{ item.item.value.webroot }}/../sql-dumps"
+    chdir: "{{ webroot }}/../sql-dumps"
   when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
   become_user: root
 
 - name: Fix logging db triggers when using a separate db
-  command: perl -pi -e 's/{{ item.item.value.canonical_crm_logging_db_name }}/{{ item.item.value.crm_logging_db_name }}/g' {{ item.item.value.canonical_crm_db_name }}.sql
+  command: perl -pi -e 's/{{ canonical_crm_logging_db_name }}/{{ crm_logging_db_name }}/g' {{ canonical_crm_db_name }}.sql
   args:
-    chdir: "{{ item.item.value.webroot }}/../sql-dumps"
+    chdir: "{{ webroot }}/../sql-dumps"
   when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
   become_user: root
 
 - name: Import the CMS database
   mysql_db:
-    name: "{{ item.item.value.cms_db_name }}"
-    target: "{{ item.item.value.webroot}}/../sql-dumps/{{ item.item.value.canonical_cms_db_name }}.sql"
+    name: "{{ cms_db_name }}"
+    target: "{{ webroot}}/../sql-dumps/{{ canonical_cms_db_name }}.sql"
     state: import
-    login_user: "{{ item.item.value.db_user }}"
-    login_password: "{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}"
   when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
   become_user: root
 
 - name: Import the Civi database
   mysql_db:
-    name: "{{ item.item.value.crm_db_name }}"
-    target: "{{ item.item.value.webroot}}/../sql-dumps/{{ item.item.value.canonical_crm_db_name }}.sql"
+    name: "{{ crm_db_name }}"
+    target: "{{ webroot}}/../sql-dumps/{{ canonical_crm_db_name }}.sql"
     state: import
-    login_user: "{{ item.item.value.db_user }}"
-    login_password: "{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}"
   when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
   become_user: root
 
 - name: Add civicrm.settings.php
   template:
     src: templates/civicrm.settings.j2
-    dest: "{{ item.item.value.civicrm_settings_php_path }}/civicrm.settings.php"
-    owner: "{{ item.item.value.run_as_user }}"
-    group: "{{ item.item.value.run_as_user }}"
+    dest: "{{ civicrm_settings_php_path }}/civicrm.settings.php"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
     mode: 0660
   become_user: root
 
 - name: Get table names for Views integration
-  command: "mysql -u{{ item.item.value.db_user }} -p{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }} {{ item.item.value.crm_db_name }} --skip-column-names --silent -e 'show tables'"
+  command: "mysql -u{{ db_user }} -p{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }} {{ crm_db_name }} --skip-column-names --silent -e 'show tables'"
   register: civi_table_names
-  when: item.item.value.cms == 'Drupal' or item.item.value.cms == 'Backdrop'
+  when: cms == 'Drupal' or cms == 'Backdrop'
   changed_when: false
 
 #TODO: Create a settings template for Backdrop
@@ -128,39 +124,39 @@
 - name: Add settings.php
   template:
     src: templates/settings.j2
-    dest: "{{ item.item.value.webroot }}/sites/default/settings.php"
-    owner: "{{ item.item.value.run_as_user }}"
-    group: "{{ item.item.value.run_as_user }}"
-  when: item.item.value.cms == 'Drupal'
+    dest: "{{ webroot }}/sites/default/settings.php"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+  when: cms == 'Drupal'
   become_user: root
 
 - name: Create wp-config.php
   shell: |
-    wp config create --dbname={{ item.item.value.cms_db_name }} --dbuser={{ item.item.value.db_user }} --dbpass={{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }} {% if item.item.value.cms_table_prefix|default('blank', True) != 'blank' %}--dbprefix={{ item.item.value.cms_table_prefix}}{% endif %} --path={{ item.item.value.webroot }} --extra-php <<PHP
-    define( 'WP_SITEURL', '{{ item.item.value.primary_url }}' );
+    wp config create --dbname={{ cms_db_name }} --dbuser={{ db_user }} --dbpass={{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }} {% if cms_table_prefix|default('blank', True) != 'blank' %}--dbprefix={{ cms_table_prefix}}{% endif %} --path={{ webroot }} --extra-php <<PHP
+    define( 'WP_SITEURL', '{{ primary_url }}' );
   args:
-    creates: "{{ item.item.value.webroot }}/wp-config.php"
-  when: item.item.value.cms == 'WordPress'
-  become_user: "{{ item.item.value.run_as_user }}"
+    creates: "{{ webroot }}/wp-config.php"
+  when: cms == 'WordPress'
+  become_user: "{{ run_as_user }}"
 
 - name: Do a search/replace for the primary URL
-  command: "wp search-replace {{ item.item.value.canonical_primary_url }} {{ item.item.value.primary_url }}"
+  command: "wp search-replace {{ canonical_primary_url }} {{ primary_url }}"
   args:
-    chdir: "{{ item.item.value.webroot }}"
-  when: item.item.value.cms == 'WordPress' and item.item.value.canonical_primary_url
-  become_user: "{{ item.item.value.run_as_user }}"
+    chdir: "{{ webroot }}"
+  when: cms == 'WordPress' and canonical_primary_url
+  become_user: "{{ run_as_user }}"
 
 - name: Set group write permissions on CiviCRM folders
   file:
-    path: "{{ item.item.value.civicrm_files_path }}"
+    path: "{{ civicrm_files_path }}"
     state: directory
     mode: g+w
     recurse: yes
   become_user: root
 
 - name: Fix wpLoadPhp on copied databases
-  command: "wp cv api setting.create wpLoadPhp={{ item.item.value.webroot }}/wp-load.php"
+  command: "wp cv api setting.create wpLoadPhp={{ webroot }}/wp-load.php"
   args:
-    chdir: "{{ item.item.value.webroot }}"
-  when: item.item.value.cms == 'WordPress' and restore_db_backup.msg == "yes" and archive_name.skipped is not defined
-  become_user: "{{ item.item.value.run_as_user }}"
+    chdir: "{{ webroot }}"
+  when: cms == 'WordPress' and restore_db_backup.msg == "yes" and archive_name.skipped is not defined
+  become_user: "{{ run_as_user }}"

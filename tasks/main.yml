@@ -80,13 +80,11 @@
     body_format: json
   when: internal_repo == '1'
   register: repos
-  tags: debug
 
 # Tasks for blank sites regardless of CMS
 - name: Create deploy keys
   include_tasks: deploy-keys.yml
-  with_items: "{{ create_gogs_repo.results }}"
-  when: create_gogs_repo.results is defined
+  when: create_gogs_repo.skipped is not defined
 
 - name: Create the folder hierarchy
   file:
@@ -184,9 +182,6 @@
 - name: Create fresh Drupal 7 sites
   include_tasks: blank-drupal7.yml
   when: ( internal_repo != "1" or repos.json | length == 0) and cms == 'Drupal'
-  notify:
-  - restart apache
-  - restart php-fpm
 
 # Tasks for blank sites regardless of CMS
 - name: Tasks for all fresh sites
@@ -202,7 +197,6 @@
 - name: Drupal tasks
   include_tasks: drupal7.yml
   when: cms == 'Drupal'
-  tags: debug
 
 # Normally this happens on login, but we need to do it now for API key purposes
 - name: Create a CiviCRM contact for the admin user
