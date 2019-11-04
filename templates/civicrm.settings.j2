@@ -58,7 +58,7 @@ if (!defined('CIVICRM_UF')) {
     define('CIVICRM_UF', getenv('CIVICRM_UF'));
   }
   else {
-    define('CIVICRM_UF', '{{ item.item.value.cms }}');
+    define('CIVICRM_UF', '{{ cms }}');
   }
 }
 
@@ -70,7 +70,7 @@ if (!defined('CIVICRM_UF')) {
  *      define( 'CIVICRM_UF_DSN', 'mysql://cms_db_username:cms_db_password@db_server/cms_database?new_link=true');
  */
 if (!defined('CIVICRM_UF_DSN') && CIVICRM_UF !== 'UnitTests') {
-  define( 'CIVICRM_UF_DSN'           , 'mysql://{{ item.item.value.db_user }}:{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }}@localhost/{{ item.item.value.cms_db_name }}?new_link=true');
+  define( 'CIVICRM_UF_DSN'           , 'mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}@localhost/{{ cms_db_name }}?new_link=true');
 }
 
 /**
@@ -98,7 +98,7 @@ if (!defined('CIVICRM_DSN')) {
     define('CIVICRM_DSN', $GLOBALS['_CV']['TEST_DB_DSN']);
   }
   else {
-    define('CIVICRM_DSN', 'mysql://{{ item.item.value.db_user }}:{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }}@localhost/{{ item.item.value.crm_db_name }}?new_link=true');
+    define('CIVICRM_DSN', 'mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}@localhost/{{ crm_db_name }}?new_link=true');
   }
 }
 
@@ -109,10 +109,10 @@ if (!defined('CIVICRM_DSN')) {
  * The CIVICRM_DSN user needs to have the rights to modify the below database schema and be able to write to it.
  */
 if (!defined('CIVICRM_LOGGING_DSN')) {
-  {% if item.item.value.crm_logging_db_name|default('CIVICRM_DSN', True) == 'CIVICRM_DSN' %}
+  {% if crm_logging_db_name|default('CIVICRM_DSN', True) == 'CIVICRM_DSN' %}
     define('CIVICRM_LOGGING_DSN', CIVICRM_DSN);
   {% else %}
-    define('CIVICRM_LOGGING_DSN', 'mysql://{{ item.item.value.db_user }}:{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }}@localhost/{{ item.item.value.crm_logging_db_name }}?new_link=true');
+    define('CIVICRM_LOGGING_DSN', 'mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}@localhost/{{ crm_logging_db_name }}?new_link=true');
   {% endif %}
 }
 
@@ -164,12 +164,12 @@ if (!defined('CIVICRM_LOGGING_DSN')) {
  *
  */
 
-define('CIVICRM_CMSDIR', '{{ item.item.value.webroot }}');
+define('CIVICRM_CMSDIR', '{{ webroot }}');
 global $civicrm_root;
 
-$civicrm_root = '{{ item.item.value.civiroot }}/';
+$civicrm_root = '{{ civiroot }}/';
 if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
-  define( 'CIVICRM_TEMPLATE_COMPILEDIR', '{{ item.item.value.civicrm_files_path }}/templates_c/');
+  define( 'CIVICRM_TEMPLATE_COMPILEDIR', '{{ civicrm_files_path }}/templates_c/');
 }
 
 /**
@@ -205,7 +205,7 @@ if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
  *
  */
 if (!defined('CIVICRM_UF_BASEURL')) {
-  define( 'CIVICRM_UF_BASEURL'      , '{{ item.item.value.primary_url }}');
+  define( 'CIVICRM_UF_BASEURL'      , '{{ primary_url }}');
 }
 
 /**
@@ -226,13 +226,13 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  // $civicrm_setting['Directory Preferences']['imageUploadDir'] = '/path/to/image-upload-dir' ;
 
  // Override the custom templates directory.
- $civicrm_setting['Directory Preferences']['customTemplateDir'] = '[cms.root]/{{ item.item.value.civicrm_custom_path }}/templates/';
+ $civicrm_setting['Directory Preferences']['customTemplateDir'] = '[cms.root]/{{ civicrm_custom_path }}/templates/';
 
  // Override the Custom php path directory.
- $civicrm_setting['Directory Preferences']['customPHPPathDir'] = '[cms.root]/{{ item.item.value.civicrm_custom_path }}/';
+ $civicrm_setting['Directory Preferences']['customPHPPathDir'] = '[cms.root]/{{ civicrm_custom_path }}/';
 
  // Override the extensions directory.
- $civicrm_setting['Directory Preferences']['extensionsDir'] = '[cms.root]/{{ item.item.value.civicrm_custom_path }}/extensions/';
+ $civicrm_setting['Directory Preferences']['extensionsDir'] = '[cms.root]/{{ civicrm_custom_path }}/extensions/';
 
  // Override the resource url
  // $civicrm_setting['URL Preferences']['userFrameworkResourceURL'] = 'https://example.com/example-resource-url/';
@@ -244,7 +244,7 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  // $civicrm_setting['URL Preferences']['customCSSURL'] = 'https://example.com/example-css-url' ;
 
  // Override the extensions resource URL
- $civicrm_setting['URL Preferences']['extensionsURL'] = '[cms.root]/{{ item.item.value.civicrm_custom_path }}/extensions';
+ $civicrm_setting['URL Preferences']['extensionsURL'] = '[cms.root]/{{ civicrm_custom_path }}/extensions';
 
  // Disable display of Community Messages on home dashboard
  // $civicrm_setting['CiviCRM Preferences']['communityMessagesUrl'] = false;
@@ -263,7 +263,7 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  * More info at http://wiki.civicrm.org/confluence/display/CRMDOC/Command-line+Script+Configuration
  */
 if (!defined('CIVICRM_SITE_KEY')) {
-  define( 'CIVICRM_SITE_KEY', "{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/sitekey create=true length=32 nosymbols=yes') }}");
+  define( 'CIVICRM_SITE_KEY', "{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/sitekey create=true length=32 nosymbols=yes') }}");
 }
 
 /**
@@ -282,12 +282,12 @@ if (!defined('CIVICRM_MAIL_SMARTY')) {
  * You must disable CIVICRM_MAIL_LOG before CiviCRM will talk to your MTA.
  */
 // if (!defined('CIVICRM_MAIL_LOG')) {
-// define( 'CIVICRM_MAIL_LOG', '{{ item.item.value.civicrm_files_path }}/templates_c/mail.log');
+// define( 'CIVICRM_MAIL_LOG', '{{ civicrm_files_path }}/templates_c/mail.log');
 // }
 
 
 if (!defined('CIVICRM_DOMAIN_ID')) {
-  define( 'CIVICRM_DOMAIN_ID', {{ item.item.value.multisite_domain_id | default(1, true) }});
+  define( 'CIVICRM_DOMAIN_ID', {{ multisite_domain_id | default(1, true) }});
 }
 
 /**

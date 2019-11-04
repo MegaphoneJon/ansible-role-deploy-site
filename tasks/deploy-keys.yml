@@ -1,10 +1,10 @@
 - name: Show the site in question
   debug:
-    msg: Setting deploy keys on "{{ item.item.key }}"
+    msg: Setting deploy keys on "{{ bare_url }}"
 
 - name: Get the home directory
   user:
-    name: "{{ item.item.value.run_as_user }}"
+    name: "{{ run_as_user }}"
   register: userinfo
 
 # Add any hosts that submodules might come from via SSH - e.g. github

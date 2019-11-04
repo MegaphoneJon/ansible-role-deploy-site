@@ -1,19 +1,19 @@
 <VirtualHost *:80>
-  DocumentRoot {{ item.value.webroot }}
-  ServerName {{ item.key }}
+  DocumentRoot {{ webroot }}
+  ServerName {{ bare_url }}
 
-  ProxyPassMatch ^/(.*\.php(/.*)?)$ "unix:/var/run/php/php-fpm-{{ item.key }}.sock|fcgi://localhost{{ item.value.webroot }}"
+  ProxyPassMatch ^/(.*\.php(/.*)?)$ "unix:/var/run/php/php-fpm-{{ bare_url }}.sock|fcgi://localhost{{ webroot }}"
   RedirectMatch 404 /\.git
-<Directory "{{ item.value.webroot }}">
+<Directory "{{ webroot }}">
   AllowOverride All
   Options -Indexes
-{% if item.value.env == 'Test' %}
+{% if env == 'Test' %}
   AuthType Basic
   AuthName "Restricted Content"
-  AuthUserFile {{ item.value.webroot }}/htpasswd
+  AuthUserFile {{ webroot }}/htpasswd
   Require valid-user
   Order allow,deny
-  Allow from {{ ansible_host }}
+  Allow from {{ ansible_ssh_host }}
   satisfy any
 {% else %}
   Require all granted

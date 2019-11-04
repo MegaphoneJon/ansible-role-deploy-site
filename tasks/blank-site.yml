@@ -1,132 +1,128 @@
-- name: Show the site in question
-  debug:
-    msg: Operating on "{{ item.item.key }}"
-
 - name: Check out civicrm-setup
   git:
     repo: https://github.com/civicrm/civicrm-setup
     dest: /opt/civicrm-setup
   become_user: root
-  when: item.item.value.civicrm == 'Yes'
+  when: civicrm == 'Yes'
 
 - name: Create CiviCRM folder
   file:
-    path: "{{ item.item.value.civiroot }}"
+    path: "{{ civiroot }}"
     state: directory
-  when: item.item.value.civicrm == 'Yes'
-  become_user: "{{ item.item.value.run_as_user }}"
+  when: civicrm == 'Yes'
+  become_user: "{{ run_as_user }}"
 
 - name: Create CiviCRM uploads folder
   file:
-    path: "{{ item.item.value.civicrm_settings_php_path }}"
+    path: "{{ civicrm_settings_php_path }}"
     state: directory
-  when: item.item.value.civicrm == 'Yes'
-  become_user: "{{ item.item.value.run_as_user }}"
+  when: civicrm == 'Yes'
+  become_user: "{{ run_as_user }}"
 
 - name: Create CiviCRM extensions/templates/php folder.
   file:
-    path: "{{ item.item.value.webroot }}/{{ filepath }}"
+    path: "{{ webroot }}/{{ filepath }}"
     state: directory
   loop_control:
     loop_var: filepath
   with_items:
-    - "{{ item.item.value.civicrm_custom_path }}"
-    - "{{ item.item.value.civicrm_custom_path }}/templates"
-    - "{{ item.item.value.civicrm_custom_path }}/extensions"
-  when: item.item.value.civicrm == 'Yes'
-  become_user: "{{ item.item.value.run_as_user }}"
+    - "{{ civicrm_custom_path }}"
+    - "{{ civicrm_custom_path }}/templates"
+    - "{{ civicrm_custom_path }}/extensions"
+  when: civicrm == 'Yes'
+  become_user: "{{ run_as_user }}"
 
 - name: Set file permissions
   file:
-    dest: "{{ item.item.value.webroot }}"
-    owner: "{{ item.item.value.run_as_user }}"
-    group: "{{ item.item.value.run_as_user }}"
+    dest: "{{ webroot }}"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
     recurse: yes
     mode: ug=rwX
   become_user: root
 
 - name: Run cv core:install
-  command: "cv -n core:install --db=mysql://{{ item.item.value.db_user }}:{{ lookup('passwordstore', item.item.value.client + '/' + hostname + '/' + item.item.value.bare_url + '/mysql') }}@localhost/{{ item.item.value.crm_db_name }} --cms-base-url={{ item.item.value.primary_url }}"
+  command: "cv -n core:install --db=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}@localhost/{{ crm_db_name }} --cms-base-url={{ primary_url }}"
   args:
-    chdir: "{{ item.item.value.civiroot }}"
-    creates: "{{ item.item.value.civicrm_settings_php_path }}/civicrm.settings.php"
-  become_user: "{{ item.item.value.run_as_user }}"
+    chdir: "{{ civiroot }}"
+    creates: "{{ civicrm_settings_php_path }}/civicrm.settings.php"
+  become_user: "{{ run_as_user }}"
 
 # This one contains any customizations we might want, like extensions directory.
 - name: Add civicrm.settings.php
   template:
     src: templates/civicrm.settings.j2
-    dest: "{{ item.item.value.civicrm_settings_php_path }}/civicrm.settings.php"
-    owner: "{{ item.item.value.run_as_user }}"
-    group: "{{ item.item.value.run_as_user }}"
+    dest: "{{ civicrm_settings_php_path }}/civicrm.settings.php"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
     mode: 0660
   become_user: root
 
 - name: git init
-  command:  git init {{ item.item.value.webroot }}
+  command:  git init {{ webroot }}
   args:
-    creates: "{{ item.item.value.webroot }}/.git"
-  become_user: "{{ item.item.value.run_as_user }}"
+    creates: "{{ webroot }}/.git"
+  become_user: "{{ run_as_user }}"
 
 - name: git config - user, email, remotes
   blockinfile:
-    path: "{{ item.item.value.webroot }}/.git/config"
+    path: "{{ webroot }}/.git/config"
     block: |
       [user]
         email = none@megaphonetech.com
-        name = {{ item.item.value.run_as_user }} on {{ item.item.key }}
+        name = {{ run_as_user }} on {{ bare_url }}
       [remote "origin"]
-        url = {{ item.item.value.git_repo_url }}
+        url = {{ git_repo_url }}
         fetch = +refs/heads/*:refs/remotes/origin/*
-        pushurl = {{ item.item.value.git_repo_push_url }}
-  become_user: "{{ item.item.value.run_as_user }}"
+        pushurl = {{ git_repo_push_url }}
+  become_user: "{{ run_as_user }}"
 
 - name: git add
   command: git add -A
   args:
-    chdir: "{{ item.item.value.webroot }}"
+    chdir: "{{ webroot }}"
   register: add_result
   changed_when: add_result.stdout != ''
-  become_user: "{{ item.item.value.run_as_user }}"
+  become_user: "{{ run_as_user }}"
 
 - name: git commit
   command: git commit -m "Initial commit (via Ansible)"
   args:
-    chdir: "{{ item.item.value.webroot }}"
+    chdir: "{{ webroot }}"
   register: commit_result
   changed_when: commit_result.rc == 0
   failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
-  become_user: "{{ item.item.value.run_as_user }}"
+  become_user: "{{ run_as_user }}"
 
 - name: Add Megaphone monitoring
-  command: "git submodule add https://github.com/MegaphoneJon/com.megaphonetech.monitoring.git {{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
+  command: "git submodule add https://github.com/MegaphoneJon/com.megaphonetech.monitoring.git {{ civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
   args:
-    chdir: "{{ item.item.value.webroot }}"
-    creates: "{{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
-  become_user: "{{ item.item.value.run_as_user }}"
+    chdir: "{{ webroot }}"
+    creates: "{{ civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
+  become_user: "{{ run_as_user }}"
 
 - name: ignore file perms on Megaphone monitoring
   git_config:
     name: core.filemode
     scope: local
-    repo: "{{ item.item.value.webroot }}/{{ item.item.value.civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
-    value: false
+    repo: "{{ webroot }}/{{ civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
+    value: 'false'
 
 # it seems like running git commands in Ansible is buggy, leads to files being owned by root.
 - name: Set file permissions (again)
   file:
-    dest: "{{ item.item.value.webroot }}"
-    owner: "{{ item.item.value.run_as_user }}"
-    group: "{{ item.item.value.run_as_user }}"
+    dest: "{{ webroot }}"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
     recurse: yes
     mode: ug=rwX
   become_user: root
 
 - name: fix git permissions
   file:
-    dest: "{{ item.item.value.webroot }}/.git"
-    owner: "{{ item.item.value.run_as_user }}"
-    group: "{{ item.item.value.run_as_user }}"
+    dest: "{{ webroot }}/.git"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
     recurse: yes
     mode: ug=rwX
   become_user: root
@@ -134,26 +130,26 @@
 - name: git add
   command: git add -A
   args:
-    chdir: "{{ item.item.value.webroot }}"
+    chdir: "{{ webroot }}"
   register: add_result
   changed_when: add_result.stdout != ''
-  become_user: "{{ item.item.value.run_as_user }}"
+  become_user: "{{ run_as_user }}"
 
 - name: git commit
   command: git commit -m "Megaphone monitoring extension (via Ansible)"
   args:
-    chdir: "{{ item.item.value.webroot }}"
+    chdir: "{{ webroot }}"
   register: commit_result
   changed_when: commit_result.rc == 0
   failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
-  become_user: "{{ item.item.value.run_as_user }}"
+  become_user: "{{ run_as_user }}"
 
 - name: git push
   command: git push --set-upstream origin master
   args:
-    chdir: "{{ item.item.value.webroot }}"
+    chdir: "{{ webroot }}"
   register: push_result
-  when: item.item.value.internal_repo == "1" and (item.item.value.git_repo_push_url is search("ssh://"))
+  when: internal_repo == "1" and (git_repo_push_url is search("ssh://"))
   changed_when: push_result.rc == 0
   failed_when: not(push_result.rc == 0)
-  become_user: "{{ item.item.value.run_as_user }}"
+  become_user: "{{ run_as_user }}"
