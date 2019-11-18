@@ -112,6 +112,17 @@
     etype: user
     permissions: rx
     recursive: yes
+    state: present
+    recalculate_mask: no_mask
+  become_user: root
+
+- name: Set default ACLs for files under the webroot
+  acl:
+    path: "{{ webroot }}"
+    entity: www-data
+    etype: user
+    permissions: rx
+    recursive: yes
     default: yes
     state: present
     recalculate_mask: no_mask
