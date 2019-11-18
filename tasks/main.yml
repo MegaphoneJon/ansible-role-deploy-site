@@ -95,20 +95,6 @@
     group: "{{ run_as_user }}"
   become_user: root
 
-- name: Make sure we can use htpasswd module
-  apt: "pkg=python-passlib state=present"
-
-- name: Add basic auth on test sites
-  htpasswd:
-    path: "{{ webroot }}/htpasswd"
-    name: megaphone
-    password: megaphone
-    owner: root
-    group: www-data
-    mode: 0640
-  become_user: root
-  when: env == 'Test'
-
 - name: Grant www-data user access to the parent folder
   acl:
     path: "{{ webroot }}/.."
@@ -153,7 +139,7 @@
 - name: Create MySQL User and set db permissions
   mysql_user:
     name: "{{ db_user }}"
-    password: "{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql create=true length=32') }}"
+    password: "{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql create=true length=32 nosymbols=yes') }}"
     priv: "{{ cms_db_name }}.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER,LOCK TABLES,CREATE TEMPORARY TABLES,CREATE VIEW/{{ crm_db_name }}.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER,LOCK TABLES,CREATE TEMPORARY TABLES,TRIGGER,CREATE ROUTINE,ALTER ROUTINE,CREATE VIEW,SHOW VIEW,REFERENCES{% if crm_logging_db_name|default('blank', True) != 'blank' %}/{{ crm_logging_db_name }}.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER,LOCK TABLES,CREATE TEMPORARY TABLES,TRIGGER,CREATE ROUTINE,ALTER ROUTINE,CREATE VIEW,REFERENCES{% endif %}"
     host: 'localhost'
     state: present
@@ -197,6 +183,20 @@
 - name: Drupal tasks
   include_tasks: drupal7.yml
   when: cms == 'Drupal'
+
+- name: Make sure we can use htpasswd module
+  apt: "pkg=python-passlib state=present"
+
+- name: Add basic auth on test sites
+  htpasswd:
+    path: "{{ webroot }}/htpasswd"
+    name: megaphone
+    password: megaphone
+    owner: root
+    group: www-data
+    mode: 0640
+  become_user: root
+  when: env == 'Test'
 
 # Normally this happens on login, but we need to do it now for API key purposes
 - name: Create a CiviCRM contact for the admin user
