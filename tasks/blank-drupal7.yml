@@ -10,8 +10,8 @@
     --root={{ webroot}}
     --site-name="{{ site_title }}"
     --account-name=admin
-    --account-pass={{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/admin create=true length=32') }}
-    --db-url=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql create=true length=32') }}@localhost/{{ cms_db_name }}
+    --account-pass={{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + hostname + '/admin create=true length=32') }}
+    --db-url=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + hostname + '/mysql create=true length=32') }}@localhost/{{ cms_db_name }}
   args:
     chdir: "{{ webroot }}"
     creates: "{{ webroot }}/sites/default/settings.php"
