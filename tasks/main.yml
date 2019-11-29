@@ -1,6 +1,6 @@
 ---
 - name: Update MFPL DNS
-  local_action: command php "{{ inventory_dir }}/helpers/mfplapi.php" "{{ inventory_hostname }}" "{{ ansible_host }}"
+  local_action: command php "{{ inventory_dir }}/helpers/mfplapi.php" "{{ inventory_hostname }}" "{{ ip_address }}"
   register: dnshelper_result
   #In theory, a better approach is to do a DNS lookup and see if I know how to control that nameserver.
   when: bare_url is search("megaphonetech.com")
