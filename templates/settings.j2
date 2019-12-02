@@ -251,7 +251,7 @@ $databases = array (
     array (
       'database' => '{{ cms_db_name }}',
       'username' => '{{ db_user }}',
-      'password' => '{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}',
+      'password' => '{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}',
       'host' => 'localhost',
       'port' => '',
       'driver' => 'mysql',

@@ -70,7 +70,7 @@ if (!defined('CIVICRM_UF')) {
  *      define( 'CIVICRM_UF_DSN', 'mysql://cms_db_username:cms_db_password@db_server/cms_database?new_link=true');
  */
 if (!defined('CIVICRM_UF_DSN') && CIVICRM_UF !== 'UnitTests') {
-  define( 'CIVICRM_UF_DSN'           , 'mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}@localhost/{{ cms_db_name }}?new_link=true');
+  define( 'CIVICRM_UF_DSN'           , 'mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}@localhost/{{ cms_db_name }}?new_link=true');
 }
 
 /**
@@ -98,7 +98,7 @@ if (!defined('CIVICRM_DSN')) {
     define('CIVICRM_DSN', $GLOBALS['_CV']['TEST_DB_DSN']);
   }
   else {
-    define('CIVICRM_DSN', 'mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}@localhost/{{ crm_db_name }}?new_link=true');
+    define('CIVICRM_DSN', 'mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}@localhost/{{ crm_db_name }}?new_link=true');
   }
 }
 
@@ -112,7 +112,7 @@ if (!defined('CIVICRM_LOGGING_DSN')) {
   {% if crm_logging_db_name|default('CIVICRM_DSN', True) == 'CIVICRM_DSN' %}
     define('CIVICRM_LOGGING_DSN', CIVICRM_DSN);
   {% else %}
-    define('CIVICRM_LOGGING_DSN', 'mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/mysql') }}@localhost/{{ crm_logging_db_name }}?new_link=true');
+    define('CIVICRM_LOGGING_DSN', 'mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}@localhost/{{ crm_logging_db_name }}?new_link=true');
   {% endif %}
 }
 
@@ -263,7 +263,7 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  * More info at http://wiki.civicrm.org/confluence/display/CRMDOC/Command-line+Script+Configuration
  */
 if (!defined('CIVICRM_SITE_KEY')) {
-  define( 'CIVICRM_SITE_KEY', "{{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + bare_url + '/sitekey create=true length=32 nosymbols=yes') }}");
+  define( 'CIVICRM_SITE_KEY', "{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/sitekey create=true length=32 nosymbols=yes') }}");
 }
 
 /**

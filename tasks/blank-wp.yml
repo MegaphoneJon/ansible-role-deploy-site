@@ -6,14 +6,14 @@
 
 - name: Create wp-config.php
   shell: |
-    wp config create --dbname={{ cms_db_name }} --dbuser={{ db_user }} --dbpass={{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + hostname + '/mysql') }} {% if cms_table_prefix|default('blank', True) != 'blank' %}--dbprefix={{ cms_table_prefix}}{% endif %} --path={{ webroot }} --extra-php <<PHP
+    wp config create --dbname={{ cms_db_name }} --dbuser={{ db_user }} --dbpass={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {% if cms_table_prefix|default('blank', True) != 'blank' %}--dbprefix={{ cms_table_prefix}}{% endif %} --path={{ webroot }} --extra-php <<PHP
     define( 'WP_SITEURL', '{{ primary_url }}' );
   args:
     creates: "{{ webroot }}/wp-config.php"
   become_user: "{{ run_as_user }}"
 
 - name: Run the WP installer
-  command: "wp core install --url={{ bare_url }} --title='{{ site_title }}' --admin_user=admin --admin_email={{ admin_email }} --admin_password={{ lookup('passwordstore', client + '/' + ansible_ssh_host + '/' + hostname + '/admin create=true length=32') }}  --path={{ webroot }}"
+  command: "wp core install --url={{ bare_url }} --title='{{ site_title }}' --admin_user=admin --admin_email={{ admin_email }} --admin_password={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/admin create=true length=32') }}  --path={{ webroot }}"
   changed_when: wpinstaller.stdout != "WordPress is already installed."
   register: wpinstaller
   become_user: "{{ run_as_user }}"

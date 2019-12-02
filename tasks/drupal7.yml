@@ -21,7 +21,6 @@
   become_user: "{{ run_as_user }}"
   changed_when: create_monitoring_role.rc == 0
   failed_when: not(create_monitoring_role.rc == 0 or create_monitoring_role.stderr is search("Duplicate entry"))
-  tags: debug
 
   # drush 7 has a bug and can't handle this.
 - name: Add remote monitoring permission to monitor role
