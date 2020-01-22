@@ -172,7 +172,6 @@
 # Build a new WP site
 - name: Create fresh WordPress sites
   include_tasks: blank-wp.yml
-  with_items: "{{ repos.results }}"
   when: ( internal_repo != "1" or repos.json | length == 0) and cms == 'WordPress'
 
 # Build a new D7 site
