@@ -33,6 +33,11 @@
     - "{{ userlist }}"
     - "{{ grouplist }}"
 
+- name: Create the php-fpm pool directory
+  file:
+    path: /etc/php/{{ php_version }}/fpm/pool.d/
+    state: directory
+
 - name: Create a php-fpm pool
   template:
     src: templates/php-pool.j2
