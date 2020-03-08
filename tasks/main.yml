@@ -219,3 +219,4 @@
   args:
     chdir: "{{ webroot }}"
   become_user: "{{ run_as_user }}"
+  when: civicrm == 'Yes'

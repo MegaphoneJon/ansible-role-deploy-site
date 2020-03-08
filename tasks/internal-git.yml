@@ -99,7 +99,7 @@
     state: import
     login_user: "{{ db_user }}"
     login_password: "{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}"
-  when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
+  when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined and civicrm == 'Yes'
   become_user: root
 
 - name: Add civicrm.settings.php
@@ -110,11 +110,12 @@
     group: "{{ run_as_user }}"
     mode: 0660
   become_user: root
+  when: civicrm == 'Yes'
 
 - name: Get table names for Views integration
   command: "mysql -u{{ db_user }} -p{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {{ crm_db_name }} --skip-column-names --silent -e 'show tables'"
   register: civi_table_names
-  when: cms == 'Drupal' or cms == 'Backdrop'
+  when: (cms == 'Drupal' or cms == 'Backdrop') and civicrm == 'Yes'
   changed_when: false
 
 #TODO: Create a settings template for Backdrop
@@ -153,6 +154,7 @@
     mode: g+w
     recurse: yes
   become_user: root
+  when: civicrm == 'Yes'
 
 - name: Fix wpLoadPhp on copied databases
   command: "wp cv api setting.create wpLoadPhp={{ webroot }}/wp-load.php"
