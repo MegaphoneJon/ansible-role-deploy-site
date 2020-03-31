@@ -52,6 +52,7 @@
 
 - name: Enable CiviCRM
   command: "wp plugin activate civicrm --path={{ webroot }}"
+  when: civicrm == 'Yes'
   become_user: "{{ run_as_user }}"
 
 # This should go in a generic WP task file, not in blank-wp

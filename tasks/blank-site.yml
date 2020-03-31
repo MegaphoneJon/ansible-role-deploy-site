@@ -46,6 +46,7 @@
   args:
     chdir: "{{ civiroot }}"
     creates: "{{ civicrm_settings_php_path }}/civicrm.settings.php"
+  when: civicrm == 'Yes'
   become_user: "{{ run_as_user }}"
 
 # This one contains any customizations we might want, like extensions directory.
@@ -56,6 +57,7 @@
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
     mode: 0660
+  when: civicrm == 'Yes'
   become_user: root
 
 - name: git init
@@ -99,6 +101,7 @@
   args:
     chdir: "{{ webroot }}"
     creates: "{{ civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
+  when: civicrm == 'Yes'
   become_user: "{{ run_as_user }}"
 
 - name: ignore file perms on Megaphone monitoring
@@ -107,6 +110,7 @@
     scope: local
     repo: "{{ webroot }}/{{ civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
     value: 'false'
+  when: civicrm == 'Yes'
 
 # it seems like running git commands in Ansible is buggy, leads to files being owned by root.
 - name: Set file permissions (again)

@@ -58,13 +58,24 @@
   environment:
     BORG_PASSPHRASE: "{{ lookup('passwordstore', canonical_server_client + '/' + canonical_hostname + '/borg/remote') }}"
   with_items:
-    - "{{ canonical_crm_db_name }}.sql"
-    - "{{ canonical_cms_db_name }}.sql"
+    - "{{ canonical_crm_db_name }}.sql.gz"
+    - "{{ canonical_cms_db_name }}.sql.gz"
   register: db_downloaded
   loop_control:
     loop_var: db_name
   when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
   become_user: root
+
+- name: Decompress the db backups
+  shell: gunzip {{ item }}
+  args:
+    chdir: "{{ webroot }}/../sql-dumps"
+  with_items:
+    - "{{ canonical_crm_db_name }}.sql.gz"
+    - "{{ canonical_cms_db_name }}.sql.gz"
+  when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
+  become_user: root
+
 
 # Don't do these other steps if a) there's no db backup in borg b) the db is already downloaded.
 # FIXME: We don't have a way of telling whether the db dump has been loaded or not, which is what we really need.  Figure out a command to determine that, then change the "when" on the next 3 tasks.
