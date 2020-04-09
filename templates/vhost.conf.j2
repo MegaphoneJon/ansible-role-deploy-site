@@ -11,10 +11,10 @@
   AuthType Basic
   AuthName "Restricted Content"
   AuthUserFile {{ webroot }}/htpasswd
-  Require valid-user
-  Order allow,deny
-  Allow from {{ ansible_ssh_host }}
-  satisfy any
+  <RequireAny>
+    Require valid-user
+    Require ip 127.0.0.1
+  </RequireAny>
 {% else %}
   Require all granted
 {% endif %}
