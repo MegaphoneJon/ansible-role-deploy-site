@@ -173,6 +173,20 @@
   with_items: "{{ create_gogs_repo.results }}"
   when: create_gogs_repo.results is defined
 
+- name: git config - user, email, remotes
+  blockinfile:
+    path: "{{ webroot }}/.git/config"
+    block: |
+      [user]
+        email = none@megaphonetech.com
+        name = {{ run_as_user }} on {{ bare_url }}
+      [remote "origin"]
+        url = {{ git_repo_url }}
+        fetch = +refs/heads/*:refs/remotes/origin/*
+        pushurl = {{ git_repo_push_url }}
+  become_user: "{{ run_as_user }}"
+  when: env == 'Test' or env == 'Live'
+
 # If repos.item.json is > 0, then branches exist in the gitea repo.
 # Build a new WP site
 - name: Create fresh WordPress sites

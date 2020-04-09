@@ -66,19 +66,6 @@
     creates: "{{ webroot }}/.git"
   become_user: "{{ run_as_user }}"
 
-- name: git config - user, email, remotes
-  blockinfile:
-    path: "{{ webroot }}/.git/config"
-    block: |
-      [user]
-        email = none@megaphonetech.com
-        name = {{ run_as_user }} on {{ bare_url }}
-      [remote "origin"]
-        url = {{ git_repo_url }}
-        fetch = +refs/heads/*:refs/remotes/origin/*
-        pushurl = {{ git_repo_push_url }}
-  become_user: "{{ run_as_user }}"
-
 - name: git add
   command: git add -A
   args:
