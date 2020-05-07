@@ -6,6 +6,7 @@ wp-content/backups/
 wp-content/backups-dup-pro/
 wp-content/blogs.dir/
 wp-content/cache/
+wp-content/updraft/
 wp-content/upgrade/
 wp-content/uploads/
 .htaccess
