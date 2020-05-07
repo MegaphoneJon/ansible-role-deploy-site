@@ -1,69 +1,4 @@
 ---
-- name: Configure /etc/hosts
-  lineinfile:
-    path: /etc/hosts
-    line: "127.0.1.1 {{ bare_url }}"
-  tags: [hostname, configuration]
-
-
-- name: Update MFPL DNS
-  local_action: command php "{{ inventory_dir }}/helpers/mfplapi.php" "{{ inventory_hostname }}" "{{ ip_address }}"
-  register: dnshelper_result
-  #In theory, a better approach is to do a DNS lookup and see if I know how to control that nameserver.
-  when: bare_url is search("megaphonetech.com")
-  changed_when: "dnshelper_result.stdout != 'DNS already exists and is correct.'"
-  become: no
-
-- name: Create the run_as_user
-  user:
-    name: "{{ run_as_user }}"
-    shell: /bin/nologin
-    generate_ssh_key: yes
-    home: "/home/{{ run_as_user }}"
-
-- name: Get users to add to the new group
-  set_fact:
-    userlist: "{{ userlist|default([]) + [ item.value.name ] + [ ansible_user ] }}"
-  with_dict: "{{ users }}"
-
-- name: Get list of groups to add to users
-  set_fact:
-    grouplist: "{{ grouplist|default([]) + [ run_as_user ] }}"
-
-- name: Add Megaphone staff to the newly-created group
-  user:
-    name: "{{ item[0] }}"
-    append: yes
-    groups:
-      - "{{ item[1] }}"
-  with_nested:
-    - "{{ userlist }}"
-    - "{{ grouplist }}"
-
-- name: Create the php-fpm pool directory
-  file:
-    path: /etc/php/{{ php_version }}/fpm/pool.d/
-    state: directory
-
-- name: Create a php-fpm pool
-  template:
-    src: templates/php-pool.j2
-    dest: /etc/php/{{ php_version }}/fpm/pool.d/{{ run_as_user }}.conf
-  notify: restart php-fpm
-
-- name: Create vhost conf (Apache)
-  template:
-    src: templates/vhost.conf.j2
-    dest: /etc/apache2/sites-available/{{ bare_url }}.conf
-  notify: restart apache
-
-- name: Enable the site (Apache)
-  file:
-    src: /etc/apache2/sites-available/{{ bare_url }}.conf
-    dest: /etc/apache2/sites-enabled/{{ bare_url }}.conf
-    state: link
-  notify: restart apache
-
 - name: Check if repos exist on gogs - create if not
   uri:
     url: https://git.megaphonetech.com/api/v1/org/{{ git_repo_owner }}/repos
@@ -192,7 +127,7 @@
         fetch = +refs/heads/*:refs/remotes/origin/*
         pushurl = {{ git_repo_push_url }}
   become_user: "{{ run_as_user }}"
-  when: env == 'Test' or env == 'Live'
+#  when: env == 'Test' or env == 'Live'
 
 # If repos.item.json is > 0, then branches exist in the gitea repo.
 # Build a new WP site

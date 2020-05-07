@@ -39,7 +39,6 @@
     url: https://download.civicrm.org/latest/civicrm-STABLE-wordpress.zip
     dest: /tmp/civicrm-STABLE-wordpress.zip
   when: civicrm == 'Yes'
-  become_user: "{{ run_as_user }}"
 
 - name: Unarchive the tarball
   unarchive:

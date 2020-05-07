@@ -37,7 +37,6 @@
     url: https://download.civicrm.org/latest/civicrm-STABLE-drupal.tar.gz
     dest: /tmp/civicrm-STABLE-drupal.tar.gz
   when: civi_installed.stat.exists == false and civicrm == 'Yes'
-  become_user: "{{ run_as_user }}"
 
 - name: Unarchive the tarball
   unarchive:

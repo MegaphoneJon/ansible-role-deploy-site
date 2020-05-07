@@ -66,6 +66,22 @@
     creates: "{{ webroot }}/.git"
   become_user: "{{ run_as_user }}"
 
+- name: set git name
+  git_config:
+    name: user.name
+    repo: "{{ webroot }}"
+    scope: global
+    value: "{{ run_as_user }} on {{ inventory_hostname }}"
+  become_user: "{{ run_as_user }}"
+
+- name: set git email
+  git_config:
+    name: user.email
+    repo: "{{ webroot }}"
+    scope: global
+    value: 'none@megaphonetech.com'
+  become_user: "{{ run_as_user }}"
+
 - name: git add
   command: git add -A
   args:
