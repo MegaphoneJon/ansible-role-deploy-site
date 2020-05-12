@@ -60,11 +60,11 @@
   when: civicrm == 'Yes'
   become_user: root
 
-- name: git init
-  command:  git init {{ webroot }}
-  args:
-    creates: "{{ webroot }}/.git"
-  become_user: "{{ run_as_user }}"
+- name: Create a git repo
+  git:
+    clone: no
+    repo: "{{ git_repo_url }}"
+    dest: "{{ webroot }}"
 
 - name: set git name
   git_config:
@@ -81,6 +81,23 @@
     scope: global
     value: 'none@megaphonetech.com'
   become_user: "{{ run_as_user }}"
+
+- name: set git remote
+  git_config:
+    name: user.email
+    repo: "{{ webroot }}"
+    scope: global
+    value: 'none@megaphonetech.com'
+  become_user: "{{ run_as_user }}"
+
+- name: set an HTTP git push URL
+  git_config:
+    name: remote.origin.pushurl
+    value: "{{ git_repo_push_url }}"
+    scope: local
+    repo: "{{ webroot }}"
+  become_user: "{{ run_as_user }}"
+  when: env == 'Test' or env == 'Live'
 
 - name: git add
   command: git add -A
