@@ -9,6 +9,7 @@ wp-content/cache/
 wp-content/updraft/
 wp-content/upgrade/
 wp-content/uploads/
+wp-content/wflogs/
 .htaccess
 .well-known
 wp-cli.local.yml
