@@ -8,3 +8,5 @@ sites/all/translations/*
 # Ignore paths that contain user-generated content.
 sites/*/files
 sites/*/private
+
+.DS_Store
