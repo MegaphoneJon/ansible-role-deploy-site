@@ -19,4 +19,4 @@ wp-content/plugins/files/civicrm/
 wp-content/civicrm-custom/ext/cache/
 wp-content/plugins/civicrm/civicrm.settings.php
 
-.DS_Store
+**/.DS_Store
