@@ -12,6 +12,7 @@
   args:
     chdir: "{{ webroot }}"
   become_user: "{{ run_as_user }}"
+  when: civicrm == 'Yes'
 
 - name: Create a role for monitoring
   command: "drush --root={{ webroot }} role-create 'monitor'"
@@ -21,11 +22,13 @@
   become_user: "{{ run_as_user }}"
   changed_when: create_monitoring_role.rc == 0
   failed_when: not(create_monitoring_role.rc == 0 or create_monitoring_role.stderr is search("Duplicate entry"))
+  when: civicrm == 'Yes'
 
   # drush 7 has a bug and can't handle this.
 - name: Add remote monitoring permission to monitor role
   command: "drush8 --root={{ webroot }} role-add-perm 'monitor' 'remote monitoring'"
   become_user: "{{ run_as_user }}"
+  when: civicrm == 'Yes'
 
   # We don't actually record the password because we don't care what it is.
 - name: Create a user for monitoring
@@ -34,6 +37,7 @@
   become_user: "{{ run_as_user }}"
   changed_when: create_monitoring_user.rc == 0
   failed_when: not(create_monitoring_user.rc == 0 or create_monitoring_user.stderr is search("There is already a user account with the email"))
+  when: civicrm == 'Yes'
   
 - name: Add the monitoring role to the monitoring user
   command: "drush --root={{ webroot }} user-add-role 'monitor' {{ monitoring_user }}"
@@ -41,6 +45,7 @@
   become_user: "{{ run_as_user }}"
   changed_when: create_monitoring_user.rc == 0
   failed_when: not(create_monitoring_user.rc == 0 or create_monitoring_user.stderr is search("There is already a user account with the email"))
+  when: civicrm == 'Yes'
 
 - name: Expand the number of log messages to keep
   command: "drush --root={{ webroot }} vset dblog_row_limit 1000000"
