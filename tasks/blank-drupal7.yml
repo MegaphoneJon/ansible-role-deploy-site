@@ -1,5 +1,5 @@
 - name: Download Drupal 7
-  command: "drush dl drupal-7 -y --destination={{ webroot }}/.. --drupal-project-rename=htdocs"
+  command: "drush dl drupal-7 -y --destination={{ webroot }}/.. --drupal-project-rename=web"
   args:
     creates: "{{ webroot }}/authorize.php"
   become_user: "{{ run_as_user }}"
