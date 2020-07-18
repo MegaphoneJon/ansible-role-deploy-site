@@ -67,7 +67,7 @@
   become_user: root
 
 - name: Decompress the db backups
-  shell: gunzip {{ item }}
+  shell: gunzip --force {{ item }}
   args:
     chdir: "{{ webroot }}/../sql-dumps"
   with_items:

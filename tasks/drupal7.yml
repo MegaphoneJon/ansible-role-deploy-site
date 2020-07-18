@@ -36,7 +36,7 @@
   register: create_monitoring_user
   become_user: "{{ run_as_user }}"
   changed_when: create_monitoring_user.rc == 0
-  failed_when: not(create_monitoring_user.rc == 0 or create_monitoring_user.stderr is search("There is already a user account with the email"))
+  failed_when: not(create_monitoring_user.rc == 0 or create_monitoring_user.stderr is search("There is already a user account with the"))
   when: civicrm == 'Yes'
   
 - name: Add the monitoring role to the monitoring user
