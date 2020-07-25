@@ -290,6 +290,10 @@ if (!defined('CIVICRM_DOMAIN_ID')) {
   define( 'CIVICRM_DOMAIN_ID', {{ multisite_domain_id | default(1, true) }});
 }
 
+if (!defined('CIVICRM_EXCLUDE_DIRS_PATTERN')) {
+   define('CIVICRM_EXCLUDE_DIRS_PATTERN', '@/(\.|node_modules|js/|css/|bower_components|packages/|vendor/|sites/default/files/private)@');
+}
+
 /**
  * Settings to enable external caching using a cache server.  This is an
  * advanced feature, and you should read and understand the documentation
