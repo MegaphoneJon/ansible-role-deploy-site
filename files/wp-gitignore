@@ -20,3 +20,4 @@ wp-content/civicrm-custom/ext/cache/
 wp-content/plugins/civicrm/civicrm.settings.php
 
 **/.DS_Store
+htpasswd

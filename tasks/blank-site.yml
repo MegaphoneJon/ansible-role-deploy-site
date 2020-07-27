@@ -66,6 +66,7 @@
     repo: "{{ git_repo_url }}"
     dest: "{{ webroot }}"
   when: git_repo_name is not none
+  become_user: "{{ run_as_user }}"
 
 - name: Create a blank repo
   command: "git init"
