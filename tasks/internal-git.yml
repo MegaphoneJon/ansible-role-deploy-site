@@ -1,3 +1,19 @@
+- name: create a list of db names
+  set_fact:
+    canonical_db_names:
+      - "{{ canonical_crm_db_name }}"
+      - "{{ canonical_cms_db_name }}"
+      - "{{ canonical_crm_logging_db_name | default(canonical_crm_db_name, true) }}"
+    db_names:
+      - "{{ crm_db_name }}"
+      - "{{ cms_db_name }}"
+      - "{{ crm_logging_db_name | default(crm_db_name, true) }}"
+
+- name: create a list of unique db names
+  set_fact:
+    canonical_db_names_unique: "{{ canonical_db_names | unique }}"
+    db_names_unique: "{{ db_names | unique }}"
+
 - name: clone an existing site
   git:
     repo: "{{ git_repo_url }}"
@@ -52,14 +68,12 @@
 
 # Download the borg backup of the db dump if we need an update and the borg backup exists.
 - name: Download the latest copy of the database
-  shell: borg extract --strip-components 4 --remote-path /usr/local/bin/borg1/borg1 {{ rsyncnet_user }}@{{ rsyncnet_server }}:{{ canonical_server_client + '-' + canonical_hostname }}::{{ archive_name.stdout }} var/backups/mysql/sqldump/{{ db_name }}
+  shell: borg extract --strip-components 4 --remote-path /usr/local/bin/borg1/borg1 {{ rsyncnet_user }}@{{ rsyncnet_server }}:{{ canonical_server_client + '-' + canonical_hostname }}::{{ archive_name.stdout }} var/backups/mysql/sqldump/{{ db_name }}.sql.gz
   args:
     chdir: "{{ webroot }}/../sql-dumps"
   environment:
     BORG_PASSPHRASE: "{{ lookup('passwordstore', canonical_server_client + '/' + canonical_hostname + '/borg/remote') }}"
-  with_items:
-    - "{{ canonical_crm_db_name }}.sql.gz"
-    - "{{ canonical_cms_db_name }}.sql.gz"
+  with_items: "{{ canonical_db_names_unique }}"
   register: db_downloaded
   loop_control:
     loop_var: db_name
@@ -67,15 +81,12 @@
   become_user: root
 
 - name: Decompress the db backups
-  shell: gunzip --force {{ item }}
+  shell: gunzip --force {{ item }}.sql.gz
   args:
     chdir: "{{ webroot }}/../sql-dumps"
-  with_items:
-    - "{{ canonical_crm_db_name }}.sql.gz"
-    - "{{ canonical_cms_db_name }}.sql.gz"
+  with_items: "{{ canonical_db_names_unique }}"
   when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
   become_user: root
-
 
 # Don't do these other steps if a) there's no db backup in borg b) the db is already downloaded.
 # FIXME: We don't have a way of telling whether the db dump has been loaded or not, which is what we really need.  Figure out a command to determine that, then change the "when" on the next 3 tasks.
@@ -93,25 +104,18 @@
   when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
   become_user: root
 
-- name: Import the CMS database
+- name: Import the databases
   mysql_db:
-    name: "{{ cms_db_name }}"
-    target: "{{ webroot}}/../sql-dumps/{{ canonical_cms_db_name }}.sql"
+    name: "{{ item.1 }}"
+    target: "{{ webroot}}/../sql-dumps/{{ item.0 }}.sql"
     state: import
     login_user: "{{ db_user }}"
     login_password: "{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}"
-  when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
+  when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined and civicrm == 'Yes' and item.1 is defined
   become_user: root
-
-- name: Import the Civi database
-  mysql_db:
-    name: "{{ crm_db_name }}"
-    target: "{{ webroot}}/../sql-dumps/{{ canonical_crm_db_name }}.sql"
-    state: import
-    login_user: "{{ db_user }}"
-    login_password: "{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}"
-  when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined and civicrm == 'Yes'
-  become_user: root
+  with_together:
+   - "{{ canonical_db_names_unique }}"
+   - "{{ db_names_unique }}"
 
 - name: Add civicrm.settings.php
   template:
