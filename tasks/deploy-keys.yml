@@ -3,6 +3,12 @@
     name: "{{ run_as_user }}"
   register: userinfo
 
+- name: Create the .ssh directory
+  file:
+    path: "{{ userinfo.home }}/.ssh"
+    state: directory
+  become_user: "{{ run_as_user }}"
+
 # Add any hosts that submodules might come from via SSH - e.g. github
 - name: Add keys to web user known_hosts
   known_hosts:
