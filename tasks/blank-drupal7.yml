@@ -20,12 +20,6 @@
     - restart apache
     - restart php-fpm
 
-- name: Set the D7 .gitignore
-  copy:
-    src: files/d7-gitignore
-    dest: "{{ webroot }}/.gitignore"
-  become_user: "{{ run_as_user }}"
-
 - name: Check if Civi is already set up.
   stat: "path={{ civiroot }}/Civi.php"
   register: civi_installed

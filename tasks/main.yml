@@ -137,6 +137,12 @@
   include_tasks: drupal7.yml
   when: cms == 'Drupal'
 
+- name: Set the .gitignore
+  copy:
+    src: files/{{ cms|lower }}-gitignore
+    dest: "{{ webroot }}/.gitignore"
+  become_user: "{{ run_as_user }}"
+
 - name: Make sure we can use htpasswd module
   apt: "pkg=python-passlib state=present"
 

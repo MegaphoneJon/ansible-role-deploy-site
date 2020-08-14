@@ -27,13 +27,6 @@
     creates: "{{ webroot }}/wp-content/plugins/wp-cli-login-server"
   become_user: "{{ run_as_user }}"
 
-# This should go in a generic WP task file, not in blank-wp
-- name: Set the WP .gitignore
-  copy:
-    src: files/wp-gitignore
-    dest: "{{ webroot }}/.gitignore"
-  become_user: "{{ run_as_user }}"
-
 - name: Download the latest Civi archive
   get_url:
     url: https://download.civicrm.org/latest/civicrm-STABLE-wordpress.zip
