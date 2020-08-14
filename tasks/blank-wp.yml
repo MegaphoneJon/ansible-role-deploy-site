@@ -46,10 +46,3 @@
   command: "wp plugin activate civicrm --path={{ webroot }}"
   when: civicrm == 'Yes'
   become_user: "{{ run_as_user }}"
-
-# This should go in a generic WP task file, not in blank-wp
-- name: Install the Icinga2 wp-version.php
-  copy:
-    src: files/wp-version.php
-    dest: "{{ webroot }}/wp-version.php"
-  become_user: "{{ run_as_user }}"
