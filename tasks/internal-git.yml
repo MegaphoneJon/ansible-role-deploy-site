@@ -101,7 +101,7 @@
   command: perl -pi -e 's/{{ canonical_crm_logging_db_name }}/{{ crm_logging_db_name }}/g' {{ canonical_crm_db_name }}.sql
   args:
     chdir: "{{ webroot }}/../sql-dumps"
-  when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined
+  when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined and canonical_crm_logging_db_name != "null"
   become_user: root
 
 - name: Import the databases
