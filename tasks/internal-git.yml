@@ -1,13 +1,13 @@
 - name: create a list of db names
   set_fact:
     canonical_db_names:
-      - "{{ canonical_crm_db_name }}"
+      #- "{{ canonical_crm_db_name }}"
       - "{{ canonical_cms_db_name }}"
-      - "{{ canonical_crm_logging_db_name | default(canonical_crm_db_name, true) }}"
+      #- "{{ canonical_crm_logging_db_name | default(canonical_crm_db_name, true) }}"
     db_names:
-      - "{{ crm_db_name }}"
+      #- "{{ crm_db_name }}"
       - "{{ cms_db_name }}"
-      - "{{ crm_logging_db_name | default(crm_db_name, true) }}"
+      #- "{{ crm_logging_db_name | default(crm_db_name, true) }}"
 
 - name: create a list of unique db names
   set_fact:
@@ -101,7 +101,7 @@
   command: perl -pi -e 's/{{ canonical_crm_logging_db_name }}/{{ crm_logging_db_name }}/g' {{ canonical_crm_db_name }}.sql
   args:
     chdir: "{{ webroot }}/../sql-dumps"
-  when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined and canonical_crm_logging_db_name != "null"
+  when: restore_db_backup.msg == "yes" and archive_name.skipped is not defined and canonical_crm_logging_db_name is not none
   become_user: root
 
 - name: Import the databases
