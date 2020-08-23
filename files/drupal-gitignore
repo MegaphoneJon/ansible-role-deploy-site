@@ -2,7 +2,7 @@
 sites/*/settings*.php
 sites/*/civicrm.settings*.php
 sites/all/civicrm/extensions/cache/*
-sites/default/drushrc.php
+**/drushrc.php
 sites/all/translations/*
 
 # Ignore paths that contain user-generated content.
