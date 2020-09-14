@@ -72,6 +72,7 @@
   args:
     chdir: "{{ webroot }}"
   become_user: "{{ run_as_user }}"
+  when: git_repo_name is not none
 
 - name: set git name
   git_config:
@@ -181,7 +182,7 @@
   args:
     chdir: "{{ webroot }}"
   register: push_result
-  when: internal_repo == "1" and (git_repo_push_url is search("ssh://"))
+  when: internal_repo == "1" and (git_repo_push_url is search("ssh://")) and git_repo_name is not none
   changed_when: push_result.rc == 0
   failed_when: not(push_result.rc == 0)
   become_user: "{{ run_as_user }}"
