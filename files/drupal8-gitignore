@@ -10,5 +10,6 @@ sites/*/files
 sites/*/private
 
 sql-dumps/*
+vendor/*
 **/.DS_Store
 htpasswd

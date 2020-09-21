@@ -27,12 +27,13 @@
     drush site-install standard -y
     --root={{ webroot}}
     --site-name="{{ site_title }}"
+    --sites-subdir=default
     --account-name=admin
     --account-pass={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/admin create=true length=32') }}
     --db-url=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql create=true length=32') }}@localhost/{{ cms_db_name }}
   args:
     chdir: "{{ webroot }}"
-    creates: "{{ webroot }}/sites/local/settings.php"
+    creates: "{{ webroot }}/sites/default/settings.php"
   become_user: "{{ run_as_user }}"
   notify:
     - restart apache
@@ -41,7 +42,7 @@
 - name: Push the settings.php template
   template:
     src: templates/d8-settings.j2
-    dest: "{{ webroot }}/sites/local/settings.php"
+    dest: "{{ webroot }}/sites/default/settings.php"
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
     mode: 0660
