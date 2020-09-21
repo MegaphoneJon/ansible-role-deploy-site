@@ -648,3 +648,9 @@ $databases['default']['default']['prefix']= array(
 '{{ table_name }}'                              => '`{{ crm_db_name }}`.',
 {% endfor %}
 );
+
+{% if env != 'Live' %}
+error_reporting(E_ALL);
+ini_set('display_errors', TRUE);
+ini_set('display_startup_errors', TRUE);
+{% endif %}
