@@ -24,6 +24,45 @@
     group: "{{ run_as_user }}"
   become_user: root
 
+- name: Create a site key
+  set_fact: dontcare="{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/sitekey create=true length=32 nosymbols=yes') }}"
+
+# Build a new WP site
+- name: Create fresh WordPress site
+  include_tasks: blank-wp.yml
+  when: cms == 'WordPress'
+
+# Build a new D7 site
+- name: Create fresh Drupal 7 site
+  include_tasks: blank-drupal7.yml
+  when: cms == 'Drupal'
+
+# Build a new D8 site
+- name: Create fresh Drupal 8 site
+  include_tasks: blank-drupal8.yml
+  when: cms == 'Drupal8'
+
+# Tasks for blank sites regardless of CMS
+- name: Tasks for all fresh sites
+  include_tasks: blank-site.yml
+  when: ( internal_repo != "1" or repos.json | length == 0)
+
+# For internal (git.megaphonetech.com) repos
+- name: Build sites from existing git repo
+  include_tasks: internal-git.yml
+  when: (internal_repo == "1" and repos.json | length > 0)
+
+# All Drupal sites
+- name: Drupal tasks
+  include_tasks: drupal7.yml
+  when: cms == 'Drupal'
+
+- name: Set the .gitignore
+  copy:
+    src: files/{{ cms|lower }}-gitignore
+    dest: "{{ webroot }}/.gitignore"
+  become_user: "{{ run_as_user }}"
+
 - name: Grant www-data user access to the webroot
   acl:
     path: "{{ webroot }}"
@@ -56,42 +95,6 @@
     group: "{{ run_as_user }}"
     recurse: yes
   become_user: root
-
-- name: Create a site key
-  set_fact: dontcare="{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/sitekey create=true length=32 nosymbols=yes') }}"
-  with_items: "{{ create_gogs_repo.results }}"
-
-# If repos.item.json is > 0, then branches exist in the gitea repo.
-# Build a new WP site
-- name: Create fresh WordPress sites
-  include_tasks: blank-wp.yml
-  when: ( internal_repo != "1" or repos.json | length == 0) and cms == 'WordPress'
-
-# Build a new D7 site
-- name: Create fresh Drupal 7 sites
-  include_tasks: blank-drupal7.yml
-  when: ( internal_repo != "1" or repos.json | length == 0) and cms == 'Drupal'
-
-# Tasks for blank sites regardless of CMS
-- name: Tasks for all fresh sites
-  include_tasks: blank-site.yml
-  when: ( internal_repo != "1" or repos.json | length == 0)
-
-# For internal (git.megaphonetech.com) repos
-- name: Build sites from existing git repo
-  include_tasks: internal-git.yml
-  when: (internal_repo == "1" and repos.json | length > 0)
-
-# All Drupal sites
-- name: Drupal tasks
-  include_tasks: drupal7.yml
-  when: cms == 'Drupal'
-
-- name: Set the .gitignore
-  copy:
-    src: files/{{ cms|lower }}-gitignore
-    dest: "{{ webroot }}/.gitignore"
-  become_user: "{{ run_as_user }}"
 
 - name: Make sure we can use htpasswd module
   apt: "pkg=python3-passlib state=present"

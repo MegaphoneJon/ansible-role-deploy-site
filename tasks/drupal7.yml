@@ -4,7 +4,6 @@
     dest: "{{ webroot }}/sites/default/drushrc.php"
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
-  when: cms == 'Drupal'
   become_user: root
 
 - name: Expand the number of log messages to keep

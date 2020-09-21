@@ -1,0 +1,39 @@
+- name: Get the latest CiviCRM version number
+  uri:
+    url: http://latest.civicrm.org/stable.php
+    return_content: yes
+  run_once: true
+  register: civi_ver
+  become: true
+
+- name: Push the composer.json template
+  template:
+    src: templates/composer.j2
+    dest: "{{ gitroot }}/composer.json"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+    mode: 0660
+  become_user: root
+  when: civicrm == 'Yes'
+
+- name: composer install
+  composer:
+    command: install
+    working_dir: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+
+- name: Install Drupal with drush.
+  command: >
+    drush site-install standard -y
+    --root={{ webroot}}
+    --site-name="{{ site_title }}"
+    --account-name=admin
+    --account-pass={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/admin create=true length=32') }}
+    --db-url=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql create=true length=32') }}@localhost/{{ cms_db_name }}
+  args:
+    chdir: "{{ webroot }}"
+    creates: "{{ webroot }}/sites/default/settings.php"
+  become_user: "{{ run_as_user }}"
+  notify:
+    - restart apache
+    - restart php-fpm

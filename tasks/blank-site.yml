@@ -5,12 +5,13 @@
   become_user: root
   when: civicrm == 'Yes'
 
-- name: Create CiviCRM folder
-  file:
-    path: "{{ civiroot }}"
-    state: directory
-  when: civicrm == 'Yes'
-  become_user: "{{ run_as_user }}"
+# FIXME: Shouldn't this be done by now?
+# - name: Create CiviCRM folder
+#   file:
+#     path: "{{ civiroot }}"
+#     state: directory
+#   when: civicrm == 'Yes'
+#   become_user: "{{ run_as_user }}"
 
 - name: Create CiviCRM uploads folder
   file:
