@@ -1,38 +1,20 @@
 ---
-- name: Check if repos exist on gogs - create if not
-  uri:
-    url: https://git.megaphonetech.com/api/v1/org/{{ git_repo_owner }}/repos
-    method: POST
-    headers:
-      Authorization: token {{ lookup('passwordstore', 'megaphone/gogs/api') }}
-    body:
-      name: "{{ git_repo_name }}"
-      description: "Repo for {{ git_repo_name }}"
-      private: true
-    body_format: json
-  register: create_gogs_repo
-  failed_when: not(create_gogs_repo.status == 201 or create_gogs_repo.status == 422 or create_gogs_repo.status == 403 or create_gogs_repo.status == 409)
-  when: internal_repo == '1'
-
-- name: Check if branches exist - if not, this repo is empty
-  uri:
-    url: https://git.megaphonetech.com/api/v1/repos/{{ git_repo_owner }}/{{ git_repo_name }}/branches
-    method: GET
-    headers:
-      Authorization: token {{ lookup('passwordstore', 'megaphone/gogs/api') }}
-    body:
-      name: "{{ git_repo_name }}"
-      description: "Repo for {{ git_repo_name }}"
-      private: true
-    body_format: json
-  when: internal_repo == '1'
-  register: repos
+# FIXME: This is only used for "blank site" detection, which we can do by checking local git count.
+# - name: Check if branches exist - if not, this repo is empty
+#   uri:
+#     url: https://git.megaphonetech.com/api/v1/repos/{{ git_repo_owner }}/{{ git_repo_name }}/branches
+#     method: GET
+#     headers:
+#       Authorization: token {{ lookup('passwordstore', 'megaphone/gogs/api') }}
+#     body:
+#       name: "{{ git_repo_name }}"
+#       description: "Repo for {{ git_repo_name }}"
+#       private: true
+#     body_format: json
+#   when: internal_repo == '1'
+#   register: repos
 
 # Tasks for blank sites regardless of CMS
-- name: Create deploy keys
-  include_tasks: deploy-keys.yml
-  when: create_gogs_repo.skipped is not defined
-
 - name: Create the folder hierarchy
   file:
     path: "{{ gitroot }}"
@@ -41,17 +23,6 @@
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
   become_user: root
-
-- name: Grant www-data user access to the parent folder
-  acl:
-    path: "{{ webroot }}/.."
-    entity: www-data
-    etype: user
-    permissions: rx
-    state: present
-    recalculate_mask: no_mask
-  become_user: root
-  tags: acl
 
 - name: Grant www-data user access to the webroot
   acl:
@@ -78,26 +49,6 @@
   become_user: root
   tags: acl
 
-# MySQL
-- name: Create CMS database
-  mysql_db:
-    name: "{{ cms_db_name }}"
-    state: present
-
-- name: Create CRM database
-  mysql_db:
-    name: "{{ crm_db_name }}"
-    state: present
-  when: civicrm == 'Yes'
-
-- name: Create MySQL User and set db permissions
-  mysql_user:
-    name: "{{ db_user }}"
-    password: "{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql create=true length=32 nosymbols=yes') }}"
-    priv: "{{ cms_db_name }}.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER,LOCK TABLES,CREATE TEMPORARY TABLES,CREATE VIEW/{{ crm_db_name }}.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER,LOCK TABLES,CREATE TEMPORARY TABLES,TRIGGER,CREATE ROUTINE,ALTER ROUTINE,CREATE VIEW,SHOW VIEW,REFERENCES{% if crm_logging_db_name|default('blank', True) != 'blank' %}/{{ crm_logging_db_name }}.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER,LOCK TABLES,CREATE TEMPORARY TABLES,TRIGGER,CREATE ROUTINE,ALTER ROUTINE,CREATE VIEW,REFERENCES{% endif %}"
-    host: 'localhost'
-    state: present
-
 - name: Set file owner
   file:
     dest: "{{ webroot }}"
@@ -106,10 +57,9 @@
     recurse: yes
   become_user: root
 
-- name: Create a site key if one doesn't exist.
+- name: Create a site key
   set_fact: dontcare="{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/sitekey create=true length=32 nosymbols=yes') }}"
   with_items: "{{ create_gogs_repo.results }}"
-  when: create_gogs_repo.results is defined
 
 # If repos.item.json is > 0, then branches exist in the gitea repo.
 # Build a new WP site
@@ -158,4 +108,3 @@
   become_user: root
   when: env == 'Test'
   tags: htpasswd
-
