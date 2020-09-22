@@ -23,6 +23,22 @@
     track_submodules: no
   become_user: "{{ run_as_user }}"
 
+- name: set an HTTP git push URL
+  git_config:
+    name: remote.origin.pushurl
+    value: "{{ git_repo_push_url }}"
+    scope: local
+    repo: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+  when: (env == 'Test' or env == 'Live') and git_repo_name is not none
+
+- name: Composer install (D8)
+  composer:
+    command: install
+    working_dir: "{{ gitroot }}"
+  when: cms == "Drupal8"
+  become_user: "{{ run_as_user }}"
+
 - name: Create CiviCRM uploads folder
   file:
     path: "{{ civicrm_settings_php_path }}"
@@ -139,12 +155,11 @@
 
 - name: Add settings.php
   template:
-    src: templates/settings.j2
+    src: templates/{{ cms }}-settings.j2
     dest: "{{ webroot }}/sites/default/settings.php"
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
-  when: cms == 'Drupal'
-  become_user: root
+  when: cms == 'Drupal' or cms == 'Drupal8' or cms == 'Backdrop'
 
 - name: Create wp-config.php
   shell: |

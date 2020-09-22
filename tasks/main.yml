@@ -1,18 +1,17 @@
 ---
-# FIXME: This is only used for "blank site" detection, which we can do by checking local git count.
-# - name: Check if branches exist - if not, this repo is empty
-#   uri:
-#     url: https://git.megaphonetech.com/api/v1/repos/{{ git_repo_owner }}/{{ git_repo_name }}/branches
-#     method: GET
-#     headers:
-#       Authorization: token {{ lookup('passwordstore', 'megaphone/gogs/api') }}
-#     body:
-#       name: "{{ git_repo_name }}"
-#       description: "Repo for {{ git_repo_name }}"
-#       private: true
-#     body_format: json
-#   when: internal_repo == '1'
-#   register: repos
+- name: Check if branches exist - if not, this repo is empty
+  uri:
+    url: https://git.megaphonetech.com/api/v1/repos/{{ git_repo_owner }}/{{ git_repo_name }}/branches
+    method: GET
+    headers:
+      Authorization: token {{ lookup('passwordstore', 'megaphone/gogs/api') }}
+    body:
+      name: "{{ git_repo_name }}"
+      description: "Repo for {{ git_repo_name }}"
+      private: true
+    body_format: json
+  when: internal_repo == '1'
+  register: repos
 
 # Tasks for blank sites regardless of CMS
 - name: Create the folder hierarchy
@@ -30,19 +29,17 @@
 # Build a new WP site
 - name: Create fresh WordPress site
   include_tasks: blank-wp.yml
-  when: cms == 'WordPress'
+  when: ( internal_repo != "1" or repos.json | length == 0) and cms == 'WordPress'
 
 # Build a new D7 site
 - name: Create fresh Drupal 7 site
   include_tasks: blank-drupal7.yml
-  when: cms == 'Drupal'
+  when: ( internal_repo != "1" or repos.json | length == 0) and cms == 'Drupal'
 
 # Build a new D8 site
 - name: Create fresh Drupal 8 site
   include_tasks: blank-drupal8.yml
-  when: cms == 'Drupal8'
-
-
+  when: ( internal_repo != "1" or repos.json | length == 0) and cms == 'Drupal8'
 
 # For internal (git.megaphonetech.com) repos
 - name: Build sites from existing git repo
@@ -57,7 +54,7 @@
 - name: Set the .gitignore
   copy:
     src: files/{{ cms|lower }}-gitignore
-    dest: "{{ webroot }}/.gitignore"
+    dest: "{{ gitroot }}/.gitignore"
   become_user: "{{ run_as_user }}"
 
 # Tasks for blank sites regardless of CMS

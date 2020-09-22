@@ -41,7 +41,7 @@
 
 - name: Push the settings.php template
   template:
-    src: templates/d8-settings.j2
+    src: "templates/{{ cms }}-settings.j2"
     dest: "{{ webroot }}/sites/default/settings.php"
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
