@@ -13,7 +13,6 @@
   when: internal_repo == '1'
   register: repos
 
-# Tasks for blank sites regardless of CMS
 - name: Create the folder hierarchy
   file:
     path: "{{ gitroot }}"
