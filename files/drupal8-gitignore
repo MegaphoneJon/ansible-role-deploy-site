@@ -11,7 +11,7 @@ web/sites/*/private
 
 #Ignore D8 stuff.
 drush/contrib/
-vendor/
+/vendor/
 web/core/
 web/modules/contrib/
 web/themes/contrib/
