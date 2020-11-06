@@ -219,6 +219,7 @@ if (!defined('CIVICRM_UF_BASEURL')) {
 {% if env == 'Test' %}
  $civicrm_setting['Developer']['environment'] = 'Staging';
  $civicrm_setting['Core']['menubar_color'] = '#E29522';
+ define('CIVICRM_TEMPLATE_COMPILE_CHECK', FALSE);
 {% elif env == 'Dev' %}
  $civicrm_setting['Developer']['environment'] = 'Development';
  $civicrm_setting['Developer']['debug_enabled'] = TRUE;
