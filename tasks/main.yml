@@ -55,7 +55,7 @@
     src: files/{{ cms|lower }}-gitignore
     dest: "{{ gitroot }}/.gitignore"
   become_user: "{{ run_as_user }}"
-  when: cms != 'Other'
+  when: cms != 'Other' and env == 'Dev'
 
 # Tasks for blank sites regardless of CMS
 - name: Tasks for all fresh sites
