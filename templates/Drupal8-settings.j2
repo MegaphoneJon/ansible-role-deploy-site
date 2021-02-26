@@ -820,6 +820,11 @@ $databases['civicrm']['default'] = [
 
 $settings['config_sync_directory'] = '../config/sync';
 
+{% for table_name in civi_table_names.stdout_lines %}
+'{{ table_name }}'                              => '`{{ crm_db_name }}`.',
+{% endfor %}
+);
+
 $settings['trusted_host_patterns'] = [
   '^{{ bare_url }}$',
 ];
