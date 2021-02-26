@@ -55,6 +55,12 @@
   when: (cms == 'Drupal' or cms == 'Backdrop') and civicrm == 'Yes'
   changed_when: false
 
+- name: Check if Domain Access is in use
+  command: "mysql -u{{ db_user }} -p{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {{ cms_db_name }} --skip-column-names --silent -e \"select REPLACE(filename, 'domain.module', 'settings.inc') from system WHERE name = 'domain'\""
+  register: domain_access_path
+  when: (cms == 'Drupal' or cms == 'Drupal8' or cms == 'Backdrop') and civicrm == 'Yes'
+  changed_when: false
+
 #TODO: Create a settings template for Backdrop
 #TODO: Create the config folders for Backdrop/D8 with appropriate owner/perms
 # config/active, config/staging, both owned/writable by run_as_user

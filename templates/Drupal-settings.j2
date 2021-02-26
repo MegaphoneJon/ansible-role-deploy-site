@@ -654,3 +654,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', TRUE);
 ini_set('display_startup_errors', TRUE);
 {% endif %}
+
+{% if domain_access_path.stdout != '' %}
+// For Domain Access module
+include DRUPAL_ROOT . '/{{ domain_access_path.stdout }}';
+{% endif %}
