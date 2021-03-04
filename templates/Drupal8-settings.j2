@@ -820,14 +820,28 @@ $databases['civicrm']['default'] = [
 
 $settings['config_sync_directory'] = '../config/sync';
 
+{% if civicrm == 'Yes' %}
+$databases['default']['default']['prefix']= [
 {% for table_name in civi_table_names.stdout_lines %}
 '{{ table_name }}'                              => '`{{ crm_db_name }}`.',
 {% endfor %}
-);
+];
+{% endif %}
 
 $settings['trusted_host_patterns'] = [
   '^{{ bare_url }}$',
 ];
+
+{% if env == 'Dev' %}
+$config['environment_indicator.indicator']['bg_color'] = '#E22222';
+$config['environment_indicator.indicator']['name'] = 'Development';
+{% endif %}
+
+
+{% if env == 'Test' %}
+$config['environment_indicator.indicator']['bg_color'] = '#E29522';
+$config['environment_indicator.indicator']['name'] = 'Test';
+{% endif %}
 
 {% if env != 'Live' %}
 error_reporting(E_ALL);

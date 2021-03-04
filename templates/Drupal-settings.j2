@@ -649,6 +649,18 @@ $databases['default']['default']['prefix']= array(
 {% endfor %}
 );
 
+{% if env == 'Dev' %}
+$conf['environment_indicator_overwrite'] = TRUE;
+$conf['environment_indicator_overwritten_name'] = 'Development';
+$conf['environment_indicator_overwritten_color'] = '#E22222';
+{% endif %}
+
+{% if env == 'Test' %}
+$conf['environment_indicator_overwrite'] = TRUE;
+$conf['environment_indicator_overwritten_name'] = 'Staging';
+$conf['environment_indicator_overwritten_color'] = '#E29522';
+{% endif %}
+
 {% if env != 'Live' %}
 error_reporting(E_ALL);
 ini_set('display_errors', TRUE);
