@@ -51,11 +51,12 @@
   when: cms == 'Drupal'
 
 - name: Set the .gitignore
-  copy:
-    src: files/{{ cms|lower }}-gitignore
+  ansible.builtin.template:
+    src: templates/{{ cms|lower }}-gitignore.j2
     dest: "{{ gitroot }}/.gitignore"
   become_user: "{{ run_as_user }}"
   when: cms != 'Other' and env == 'Dev'
+  tags: gitignore
 
 # Tasks for blank sites regardless of CMS
 - name: Tasks for all fresh sites
