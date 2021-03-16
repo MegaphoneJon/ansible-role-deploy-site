@@ -15,7 +15,7 @@
         }
     ],
     "require": {
-        "civicrm/civicrm-asset-plugin": "~1.0.0",
+        "civicrm/civicrm-asset-plugin": "~1.1",
         "civicrm/civicrm-core": "{{ civi_ver.content }}",
         "civicrm/civicrm-drupal-8": "{{ civi_ver.content }}",
         "civicrm/civicrm-packages": "{{ civi_ver.content }}",
@@ -92,6 +92,8 @@
                 "  * Remove the plugin that prints this message:",
                 "      composer remove drupal/core-project-message"
             ]
-        }
+        },
+        "enable-patching": "true",
+        "compile-whitelist": ["civicrm/civicrm-core", "civicrm/composer-compile-lib"]
     }
 }
