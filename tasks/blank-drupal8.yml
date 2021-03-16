@@ -18,7 +18,7 @@
 
 - name: composer install
   composer:
-    command: install
+    command: update
     working_dir: "{{ gitroot }}"
   become_user: "{{ run_as_user }}"
 
@@ -38,6 +38,12 @@
   notify:
     - restart apache
     - restart php-fpm
+
+- name: Get table names for Views integration
+  command: "mysql -u{{ db_user }} -p{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {{ crm_db_name }} --skip-column-names --silent -e 'show tables'"
+  register: civi_table_names
+  when: (cms == 'Drupal' or cms == 'Drupal8' or cms == 'Backdrop') and civicrm == 'Yes'
+  changed_when: false
 
 - name: Push the settings.php template
   template:
