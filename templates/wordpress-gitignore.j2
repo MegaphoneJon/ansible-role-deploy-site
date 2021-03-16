@@ -21,4 +21,6 @@ wp-content/plugins/civicrm/civicrm.settings.php
 
 **/.DS_Store
 htpasswd
+{% if canonical_bare_url is not none %}
 {% include "files/" + canonical_bare_url + "/gitignore-include.j2" ignore missing %}
+{% endif %}

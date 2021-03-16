@@ -22,4 +22,6 @@ web/libraries/
 sql-dumps/*
 **/.DS_Store
 web/htpasswd
+{% if canonical_bare_url is not none %}
 {% include "files/" + canonical_bare_url + "/gitignore-include.j2" ignore missing %}
+{% endif %}
