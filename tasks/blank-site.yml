@@ -61,63 +61,75 @@
   when: civicrm == 'Yes'
   become_user: root
 
-- name: Create a blank repo
-  command: "git init"
-  args:
-    chdir: "{{ gitroot }}"
-    creates: "{{ gitroot }}/.git"
-  become_user: "{{ run_as_user }}"
+- name: Push the settings.php template again, for Views integration
+  template:
+    src: "templates/{{ cms }}-settings.j2"
+    dest: "{{ webroot }}/sites/default/settings.php"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+    mode: 0660
+  become_user: root
+  when: civicrm == 'Yes' and (cms == 'Drupal' or cms == 'Drupal8')
 
-- name: set git name
-  git_config:
-    name: user.name
-    repo: "{{ gitroot }}"
-    scope: global
-    value: "{{ run_as_user }} on {{ inventory_hostname }}"
-  become_user: "{{ run_as_user }}"
+- block:
+  - name: Create a blank repo
+    command: "git init"
+    args:
+      chdir: "{{ gitroot }}"
+      creates: "{{ gitroot }}/.git"
+    become_user: "{{ run_as_user }}"
 
-- name: set git email
-  git_config:
-    name: user.email
-    repo: "{{ gitroot }}"
-    scope: global
-    value: 'none@megaphonetech.com'
-  become_user: "{{ run_as_user }}"
+  - name: set git name
+    git_config:
+      name: user.name
+      repo: "{{ gitroot }}"
+      scope: global
+      value: "{{ run_as_user }} on {{ inventory_hostname }}"
+    become_user: "{{ run_as_user }}"
 
-- name: set git remote
-  git_config:
-    name: remote.origin.url
-    value: "{{ git_repo_url }}"
-    scope: local
-    repo: "{{ gitroot }}"
-  become_user: "{{ run_as_user }}"
+  - name: set git email
+    git_config:
+      name: user.email
+      repo: "{{ gitroot }}"
+      scope: global
+      value: 'none@megaphonetech.com'
+    become_user: "{{ run_as_user }}"
+
+  - name: set git remote
+    git_config:
+      name: remote.origin.url
+      value: "{{ git_repo_url }}"
+      scope: local
+      repo: "{{ gitroot }}"
+    become_user: "{{ run_as_user }}"
+
+
+  - name: set an HTTP git push URL
+    git_config:
+      name: remote.origin.pushurl
+      value: "{{ git_repo_push_url }}"
+      scope: local
+      repo: "{{ gitroot }}"
+    become_user: "{{ run_as_user }}"
+    when: (env == 'Test' or env == 'Live')
+
+  - name: git add
+    command: git add -A
+    args:
+      chdir: "{{ gitroot }}"
+    register: add_result
+    changed_when: add_result.stdout != ''
+    become_user: "{{ run_as_user }}"
+
+  - name: git commit
+    command: git commit -m "Initial commit (via Ansible)"
+    args:
+      chdir: "{{ gitroot }}"
+    register: commit_result
+    changed_when: commit_result.rc == 0
+    failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
+    become_user: "{{ run_as_user }}"
   when: git_repo_name is not none
-
-- name: set an HTTP git push URL
-  git_config:
-    name: remote.origin.pushurl
-    value: "{{ git_repo_push_url }}"
-    scope: local
-    repo: "{{ gitroot }}"
-  become_user: "{{ run_as_user }}"
-  when: (env == 'Test' or env == 'Live') and git_repo_name is not none
-
-- name: git add
-  command: git add -A
-  args:
-    chdir: "{{ gitroot }}"
-  register: add_result
-  changed_when: add_result.stdout != ''
-  become_user: "{{ run_as_user }}"
-
-- name: git commit
-  command: git commit -m "Initial commit (via Ansible)"
-  args:
-    chdir: "{{ gitroot }}"
-  register: commit_result
-  changed_when: commit_result.rc == 0
-  failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
-  become_user: "{{ run_as_user }}"
 
 - name: Add Megaphone monitoring
   command: "git submodule add https://github.com/MegaphoneJon/com.megaphonetech.monitoring.git {{ civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
@@ -126,14 +138,6 @@
     creates: "{{ civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
   when: civicrm == 'Yes'
   become_user: "{{ run_as_user }}"
-
-# - name: ignore file perms on Megaphone monitoring
-#   git_config:
-#     name: core.filemode
-#     scope: local
-#     repo: "{{ webroot }}/{{ civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
-#     value: 'false'
-#   when: civicrm == 'Yes'
 
 # it seems like running git commands in Ansible is buggy, leads to files being owned by root.
 - name: Set file permissions (again)
@@ -145,38 +149,40 @@
     mode: ug=rwX
   become_user: root
 
-- name: fix git permissions
-  file:
-    dest: "{{ gitroot }}/.git"
-    owner: "{{ run_as_user }}"
-    group: "{{ run_as_user }}"
-    recurse: yes
-    mode: ug=rwX
-  become_user: root
+- block:
+  - name: fix git permissions
+    file:
+      dest: "{{ gitroot }}/.git"
+      owner: "{{ run_as_user }}"
+      group: "{{ run_as_user }}"
+      recurse: yes
+      mode: ug=rwX
+    become_user: root
 
-- name: git add
-  command: git add -A
-  args:
-    chdir: "{{ gitroot }}"
-  register: add_result
-  changed_when: add_result.stdout != ''
-  become_user: "{{ run_as_user }}"
+  - name: git add
+    command: git add -A
+    args:
+      chdir: "{{ gitroot }}"
+    register: add_result
+    changed_when: add_result.stdout != ''
+    become_user: "{{ run_as_user }}"
 
-- name: git commit
-  command: git commit -m "Megaphone monitoring extension (via Ansible)"
-  args:
-    chdir: "{{ gitroot }}"
-  register: commit_result
-  changed_when: commit_result.rc == 0
-  failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
-  become_user: "{{ run_as_user }}"
+  - name: git commit
+    command: git commit -m "Megaphone monitoring extension (via Ansible)"
+    args:
+      chdir: "{{ gitroot }}"
+    register: commit_result
+    changed_when: commit_result.rc == 0
+    failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
+    become_user: "{{ run_as_user }}"
 
-- name: git push
-  command: git push --set-upstream origin master
-  args:
-    chdir: "{{ gitroot }}"
-  register: push_result
-  when: internal_repo == "1" and (git_repo_push_url is search("ssh://")) and git_repo_name is not none
-  changed_when: push_result.rc == 0
-  failed_when: not(push_result.rc == 0)
-  become_user: "{{ run_as_user }}"
+  - name: git push
+    command: git push --set-upstream origin master
+    args:
+      chdir: "{{ gitroot }}"
+    register: push_result
+    when: internal_repo == "1" and (git_repo_push_url is search("ssh://"))
+    changed_when: push_result.rc == 0
+    failed_when: not(push_result.rc == 0)
+    become_user: "{{ run_as_user }}"
+  when: git_repo_name is not none
