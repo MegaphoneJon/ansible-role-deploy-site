@@ -82,14 +82,6 @@
   when: cms == 'WordPress'
   become_user: "{{ run_as_user }}"
 
-# FIXME: This is provisionally replaced with a perl find/replace in db sync
-- name: Do a search/replace for the primary URL
-  command: "wp search-replace {{ canonical_primary_url }} {{ primary_url }}"
-  args:
-    chdir: "{{ webroot }}"
-  when: cms == 'WordPress' and canonical_primary_url
-  become_user: "{{ run_as_user }}"
-
 - name: Fix wpLoadPhp on copied databases
   command: "wp cv api setting.create wpLoadPhp={{ webroot }}/wp-load.php"
   args:
