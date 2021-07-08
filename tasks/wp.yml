@@ -1,0 +1,7 @@
+- name: Set a .htaccess
+  copy:
+    src: files/.htaccess
+    dest: "{{ webroot }}/.htaccess"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+  become_user: root
