@@ -1,3 +1,7 @@
+- name: Check if Drupal has been installed yet
+  command: "drush --root={{ webroot }} -y core-status bootstrap"
+  register: drupal_installed
+
 - name: clone an existing site
   git:
     repo: "{{ git_repo_url }}"
@@ -60,7 +64,7 @@
 - name: Check if Domain Access is in use
   command: "mysql -u{{ db_user }} -p{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {{ cms_db_name }} --skip-column-names --silent -e \"select REPLACE(filename, 'domain.module', 'settings.inc') from system WHERE name = 'domain'\""
   register: domain_access_path
-  when: (cms == 'Drupal' or cms == 'Backdrop') and civicrm == 'Yes'
+  when: (cms == 'Drupal' or cms == 'Backdrop') and civicrm == 'Yes' and drupal_installed is search("Successful")
   changed_when: false
 
 #TODO: Create a settings template for Backdrop
