@@ -11,29 +11,29 @@
   become_user: "{{ run_as_user }}"
 
 - name: Don't print errors to screen
-  command: "drush --root={{ webroot }} vset error_level 0"
+  command: "drush8 --root={{ webroot }} vset error_level 0"
   become_user: "{{ run_as_user }}"
 
 - name: Enable role_watchdog
-  command: "drush --root={{ webroot }} en -y role_watchdog"
+  command: "drush8 --root={{ webroot }} en -y role_watchdog"
   args:
     creates: "{{ webroot }}/sites/all/modules/role_watchdog"
   become_user: "{{ run_as_user }}"
 
 - name: Enable clear_password_field
-  command: "drush --root={{ webroot }} en -y clear_password_field"
+  command: "drush8 --root={{ webroot }} en -y clear_password_field"
   args:
     creates: "{{ webroot }}/sites/all/modules/clear_password_field"
   become_user: "{{ run_as_user }}"
 
 - name: Enable hide_php_fatal_error 
-  command: "drush --root={{ webroot }} en -y hide_php_fatal_error"
+  command: "drush8 --root={{ webroot }} en -y hide_php_fatal_error"
   args:
     creates: "{{ webroot }}/sites/all/modules/hide_php_fatal_error"
   become_user: "{{ run_as_user }}"
 
 - name: Enable remove_generator 
-  command: "drush --root={{ webroot }} en -y remove_generator"
+  command: "drush8 --root={{ webroot }} en -y remove_generator"
   args:
     creates: "{{ webroot }}/sites/all/modules/remove_generator"
   become_user: "{{ run_as_user }}"
