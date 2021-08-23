@@ -4,6 +4,7 @@
     dest: "{{ gitroot }}"
     version: master
     umask: "0007"
+    depth: 150
     track_submodules: no
   become_user: "{{ run_as_user }}"
 
