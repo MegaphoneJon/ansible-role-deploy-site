@@ -60,6 +60,7 @@
     mode: 0660
   when: civicrm == 'Yes'
   become_user: root
+  tags: civicrm.settings.php
 
 - name: Push the settings.php template again, for Views integration
   template:
@@ -130,14 +131,6 @@
     failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
     become_user: "{{ run_as_user }}"
   when: git_repo_name is not none
-
-- name: Add Megaphone monitoring
-  command: "git submodule add https://github.com/MegaphoneJon/com.megaphonetech.monitoring.git {{ civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
-  args:
-    chdir: "{{ gitroot }}"
-    creates: "{{ civicrm_custom_path }}/extensions/com.megaphonetech.monitoring"
-  when: civicrm == 'Yes'
-  become_user: "{{ run_as_user }}"
 
 # it seems like running git commands in Ansible is buggy, leads to files being owned by root.
 - name: Set file permissions (again)
