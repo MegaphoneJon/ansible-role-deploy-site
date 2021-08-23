@@ -87,10 +87,3 @@
     creates: "{{ webroot }}/wp-config.php"
   when: cms == 'WordPress'
   become_user: "{{ run_as_user }}"
-
-- name: Fix wpLoadPhp on copied databases
-  command: "wp cv api setting.create wpLoadPhp={{ webroot }}/wp-load.php"
-  args:
-    chdir: "{{ webroot }}"
-  when: cms == 'WordPress'
-  become_user: "{{ run_as_user }}"
