@@ -22,18 +22,6 @@
     - restart apache
     - restart php-fpm
 
-- name: Create a blank .htaccess file
-  file:
-    path: "{{ webroot }}/.htaccess"
-    state: touch
-    mode: 0664
-    group: "{{ run_as_user }}"
-    owner: "{{ run_as_user }}"
-
-- name: Write the .htaccess rules
-  command: "wp rewrite flush --hard --path={{ webroot }}"
-  become_user: "{{ run_as_user }}"
-
 - name: Install the wp-login companion plugin
   command: "wp login install --activate --path={{ webroot }}"
   args:
