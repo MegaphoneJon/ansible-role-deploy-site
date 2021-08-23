@@ -50,6 +50,21 @@
   include_tasks: drupal7.yml
   when: cms == 'Drupal'
 
+# All WP sites
+- name: WordPress tasks
+  include_tasks: wp.yml
+  when: cms == 'WordPress'
+
+- name: git config - user/email
+  blockinfile:
+    path: "{{ gitroot }}/.git/config"
+    block: |
+      [user]
+        email = none@megaphonetech.com
+        name = {{ run_as_user }} on {{ inventory_hostname }}
+  become: yes
+  become_user: "{{ run_as_user }}"
+
 - name: Set the .gitignore
   ansible.builtin.template:
     src: templates/{{ cms|lower }}-gitignore.j2
@@ -57,6 +72,23 @@
   become_user: "{{ run_as_user }}"
   when: cms != 'Other' and env == 'Dev'
   tags: gitignore
+
+- name: git add
+  command: git add -A
+  args:
+    chdir: "{{ gitroot }}"
+  register: add_result
+  changed_when: add_result.stdout != ''
+  become_user: "{{ run_as_user }}"
+
+- name: git commit
+  command: git commit -m "updated .gitignore"
+  args:
+    chdir: "{{ gitroot }}"
+  register: commit_result
+  changed_when: commit_result.rc == 0
+  failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
+  become_user: "{{ run_as_user }}"
 
 # Tasks for blank sites regardless of CMS
 - name: Tasks for all fresh sites
