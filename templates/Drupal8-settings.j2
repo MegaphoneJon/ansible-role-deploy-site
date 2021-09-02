@@ -835,12 +835,16 @@ $settings['trusted_host_patterns'] = [
 {% if env == 'Dev' %}
 $config['environment_indicator.indicator']['bg_color'] = '#E22222';
 $config['environment_indicator.indicator']['name'] = 'Development';
+// Disable drupal's built in cron trigger.
+$conf['cron_safe_threshold'] = 0;
 {% endif %}
 
 
 {% if env == 'Test' %}
 $config['environment_indicator.indicator']['bg_color'] = '#E29522';
 $config['environment_indicator.indicator']['name'] = 'Test';
+// Disable drupal's built in cron trigger.
+$conf['cron_safe_threshold'] = 0;
 {% endif %}
 
 {% if env != 'Live' %}
