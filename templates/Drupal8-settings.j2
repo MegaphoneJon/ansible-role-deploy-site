@@ -850,5 +850,6 @@ ini_set('display_startup_errors', TRUE);
 // Disable drupal's built in cron trigger.
 $config['system.cron']['threshold']['requirements_error'] = 9999999999;
 $config['system.cron']['threshold']['requirements_warning'] = 9999999999;
+$config['nagios.settings']['nagios']['function']['cron'] = FALSE;
 {% endif %}
 
