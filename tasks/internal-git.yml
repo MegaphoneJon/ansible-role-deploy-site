@@ -7,7 +7,7 @@
     repo: "{{ git_repo_url }}"
     dest: "{{ gitroot }}"
     version: master
-    umask: "0007"
+    umask: "{{ umask }}"
     depth: 150
     track_submodules: no
   become_user: "{{ run_as_user }}"
