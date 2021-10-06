@@ -642,12 +642,14 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
  * @see drupal_clean_css_identifier()
  */
 # $conf['allow_css_double_underscores'] = TRUE;
+{% if civicrm == 'Yes' %}
 $databases['default']['default']['prefix']= array(
   'default' => '',
 {% for table_name in civi_table_names.stdout_lines %}
 '{{ table_name }}'                              => '`{{ crm_db_name }}`.',
 {% endfor %}
 );
+{% endif %}
 
 {% if env == 'Dev' %}
 $conf['environment_indicator_overwrite'] = TRUE;
