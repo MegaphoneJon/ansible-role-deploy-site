@@ -67,7 +67,7 @@
 - name: Check if Domain Access is in use
   command: "mysql -u{{ db_user }} -p{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {{ cms_db_name }} --skip-column-names --silent -e \"select REPLACE(filename, 'domain.module', 'settings.inc') from system WHERE name = 'domain'\""
   register: domain_access_path
-  when: (cms == 'Drupal' or cms == 'Drupal8') and civicrm == 'Yes' and drupal_installed is search("Successful")
+  when: cms == 'Drupal' and civicrm == 'Yes' and drupal_installed is search("Successful")
   changed_when: false
 
 #TODO: Create a settings template for Backdrop
