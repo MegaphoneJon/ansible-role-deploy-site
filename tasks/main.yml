@@ -12,6 +12,7 @@
     body_format: json
   when: internal_repo == '1'
   register: repos
+  tags: civicrm.settings.php
 
 - name: Create the folder hierarchy
   file:
@@ -44,6 +45,7 @@
 - name: Build sites from existing git repo
   include_tasks: internal-git.yml
   when: (internal_repo == "1" and repos.json | length > 0)
+  tags: civicrm.settings.php
 
 # All Drupal sites
 - name: Drupal tasks
@@ -94,6 +96,7 @@
 - name: Tasks for all fresh sites
   include_tasks: blank-site.yml
   when: ( internal_repo != "1" or repos.json | length == 0)
+  tags: civicrm.settings.php
 
 - name: Make sure we can use htpasswd module
   apt: "pkg=python3-passlib state=present"
