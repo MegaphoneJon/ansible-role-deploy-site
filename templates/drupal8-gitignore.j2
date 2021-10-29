@@ -1,27 +1,28 @@
 # Ignore configuration files that may contain sensitive information.
-web/sites/*/settings*.php
-web/sites/*/civicrm.settings*.php
-web/sites/all/civicrm/extensions/cache/*
-**/drushrc.php
-web/sites/all/translations/*
+/web/sites/*/settings*.php
+/web/sites/*/civicrm.settings*.php
+/web/sites/all/civicrm/extensions/cache/*
+/drush/drush.yml
+/web/sites/all/translations/*
+.env
 
 # Ignore paths that contain user-generated content.
-web/sites/*/files
-web/sites/*/private
+/web/sites/*/files
+/web/sites/*/private
 
 #Ignore D8 stuff.
-drush/contrib/
+/drush/contrib/
 /vendor/
-web/core/
-web/modules/contrib/
-web/themes/contrib/
-web/profiles/contrib/
-web/libraries/
+/web/core/
+/web/modules/contrib/
+/web/themes/contrib/
+/web/profiles/contrib/
+/web/libraries/
 
 # Ignore Megaphone stuff.
-sql-dumps/*
+/sql-dumps/*
 **/.DS_Store
-web/htpasswd
+/web/htpasswd
 {% if canonical_bare_url is not none %}
 {% include "files/" + canonical_bare_url + "/gitignore-include.j2" ignore missing %}
 {% endif %}
