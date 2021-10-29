@@ -47,16 +47,6 @@
   when: (internal_repo == "1" and repos.json | length > 0)
   tags: civicrm.settings.php
 
-# All Drupal sites
-- name: Drupal tasks
-  include_tasks: drupal7.yml
-  when: cms == 'Drupal'
-
-# All WP sites
-- name: WordPress tasks
-  include_tasks: wp.yml
-  when: cms == 'WordPress'
-
 - name: git config - user/email
   blockinfile:
     path: "{{ gitroot }}/.git/config"
