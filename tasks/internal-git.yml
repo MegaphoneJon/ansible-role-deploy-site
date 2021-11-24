@@ -62,6 +62,7 @@
   register: civi_table_names
   when: (cms == 'Drupal' or cms == 'Drupal8' or cms == 'Backdrop') and civicrm == 'Yes'
   changed_when: false
+  tags: settings.php
 
 - name: Check if Domain Access is in use
   command: "mysql -u{{ db_user }} -p{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {{ cms_db_name }} --skip-column-names --silent -e \"select REPLACE(filename, 'domain.module', 'settings.inc') from system WHERE name = 'domain'\""
@@ -80,6 +81,7 @@
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
   when: cms == 'Drupal' or cms == 'Drupal8' or cms == 'Backdrop'
+  tags: settings.php
 
 - name: Create wp-config.php
   shell: |

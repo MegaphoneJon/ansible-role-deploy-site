@@ -12,7 +12,7 @@
     body_format: json
   when: internal_repo == '1'
   register: repos
-  tags: civicrm.settings.php
+  tags: civicrm.settings.php,settings.php
 
 - name: Create the folder hierarchy
   file:
@@ -45,7 +45,7 @@
 - name: Build sites from existing git repo
   include_tasks: internal-git.yml
   when: (internal_repo == "1" and repos.json | length > 0)
-  tags: civicrm.settings.php
+  tags: civicrm.settings.php,settings.php
 
 - name: git config - user/email
   blockinfile:
