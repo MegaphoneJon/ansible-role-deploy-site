@@ -45,7 +45,7 @@
     group: "{{ run_as_user }}"
     mode: 0660
   become_user: root
-  when: civicrm == 'Yes'
+  when: civicrm == 'Yes' and 'pantheon' not in group_names
   tags: civicrm.settings.php
 
 - name: Set group write permissions on CiviCRM folders
@@ -80,7 +80,7 @@
     dest: "{{ webroot }}/sites/default/settings.php"
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
-  when: cms == 'Drupal' or cms == 'Drupal8' or cms == 'Backdrop'
+  when: (cms == 'Drupal' or cms == 'Drupal8' or cms == 'Backdrop')  and 'pantheon' not in group_names
   tags: settings.php
 
 - name: Create wp-config.php
@@ -91,5 +91,13 @@
     {{ (env == 'Dev') | ternary('define( ''FORCE_SSL_ADMIN'', FALSE );', '') }}
   args:
     creates: "{{ webroot }}/wp-config.php"
-  when: cms == 'WordPress'
+  when: cms == 'WordPress' and 'pantheon' not in group_names
   become_user: "{{ run_as_user }}"
+
+- name: Create wp-config-local.php
+  template:
+    src: templates/wp-config-local.pantheon.j2
+    dest: "{{ webroot }}/wp-config-local.php"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+  when: cms == 'WordPress' and 'pantheon' in group_names
