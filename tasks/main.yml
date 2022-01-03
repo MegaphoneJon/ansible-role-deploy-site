@@ -29,17 +29,17 @@
 # Build a new WP site
 - name: Create fresh WordPress site
   include_tasks: blank-wp.yml
-  when: internal_repo == "1" and repos.json | length == 0 and cms == 'WordPress'
+  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names)  and cms == 'WordPress'
 
 # Build a new D7 site
 - name: Create fresh Drupal 7 site
   include_tasks: blank-drupal7.yml
-  when: internal_repo == "1" and repos.json | length == 0 and cms == 'Drupal'
+  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names) and cms == 'Drupal'
 
 # Build a new D8 site
 - name: Create fresh Drupal 8 site
   include_tasks: blank-drupal8.yml
-  when: internal_repo == "1" and repos.json | length == 0 and cms == 'Drupal8'
+  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names) and cms == 'Drupal8'
 
 # For building site from an existing git repo
 - name: Build sites from existing git repo
@@ -85,7 +85,7 @@
 # Tasks for blank sites regardless of CMS
 - name: Tasks for all fresh sites
   include_tasks: blank-site.yml
-  when: ( internal_repo != "1" or repos.json | length == 0)
+  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names)
   tags: civicrm.settings.php
 
 - name: Make sure we can use htpasswd module

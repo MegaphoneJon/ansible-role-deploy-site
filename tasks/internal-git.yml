@@ -45,7 +45,7 @@
     group: "{{ run_as_user }}"
     mode: 0660
   become_user: root
-  when: civicrm == 'Yes' and 'pantheon' not in group_names
+  when: civicrm == 'Yes'
   tags: civicrm.settings.php
 
 - name: Set group write permissions on CiviCRM folders
