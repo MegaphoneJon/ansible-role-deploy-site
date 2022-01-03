@@ -170,7 +170,7 @@
     become_user: "{{ run_as_user }}"
 
   - name: git push
-    command: git push --set-upstream origin master
+    command: "git push --set-upstream origin {{ git_main_branch }}"
     args:
       chdir: "{{ gitroot }}"
     register: push_result
