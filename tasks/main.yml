@@ -72,6 +72,7 @@
   register: add_result
   changed_when: add_result.stdout != ''
   become_user: "{{ run_as_user }}"
+  tags: git-add-commit-push
 
 - name: git commit
   command: git commit -m "updated .gitignore"
@@ -81,6 +82,7 @@
   changed_when: commit_result.rc == 0
   failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
   become_user: "{{ run_as_user }}"
+  tags: git-add-commit-push
 
 # Tasks for blank sites regardless of CMS
 - name: Tasks for all fresh sites
@@ -103,3 +105,14 @@
   become_user: root
   when: env == 'Test'
   tags: htpasswd
+
+- name: git push
+  command: git push
+  args:
+    chdir: "{{ gitroot }}"
+  register: push_result_addl
+  become_user: "{{ run_as_user }}"
+  when: internal_repo == "1" and (git_repo_push_url is search("ssh://"))
+  changed_when: push_result_addl.rc == 0 and push_result_addl.stderr != 'Everything up-to-date'
+  failed_when: not(push_result_addl.rc == 0)
+  tags: git-add-commit-push
