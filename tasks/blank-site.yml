@@ -161,7 +161,7 @@
     become_user: "{{ run_as_user }}"
 
   - name: git commit
-    command: git commit -m "Megaphone monitoring extension (via Ansible)"
+    command: git commit -m "Fix site permissions"
     args:
       chdir: "{{ gitroot }}"
     register: commit_result
