@@ -8,6 +8,7 @@
   shell: |
     wp config create --dbname={{ cms_db_name }} --dbuser={{ db_user }} --dbpass={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {% if cms_table_prefix|default('blank', True) != 'blank' %}--dbprefix={{ cms_table_prefix}}{% endif %} --path={{ webroot }} --extra-php <<PHP
     define( 'WP_SITEURL', '{{ primary_url }}' );
+    define( 'WP_HOME', '{{ primary_url }}' );
     define( 'HABITAT_ENVIRONMENT', '{{ env }}' );
     {{ (env == 'Dev') | ternary('define( ''FORCE_SSL_ADMIN'', FALSE );', '') }}
   args:
