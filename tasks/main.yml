@@ -26,6 +26,12 @@
 - name: Create a site key
   set_fact: dontcare="{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/sitekey create=true length=32 nosymbols=yes') }}"
 
+# For building site from an existing git repo
+- name: Build sites from existing git repo
+  include_tasks: internal-git.yml
+  when: (internal_repo == "1" and repos.json | length > 0) or "git.megaphonetech.com" not in git_repo_url
+  tags: civicrm.settings.php,settings.php,wp-config.php
+
 # Build a new WP site
 - name: Create fresh WordPress site
   include_tasks: blank-wp.yml
@@ -41,11 +47,19 @@
   include_tasks: blank-drupal8.yml
   when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names) and cms == 'Drupal8'
 
-# For building site from an existing git repo
-- name: Build sites from existing git repo
-  include_tasks: internal-git.yml
-  when: (internal_repo == "1" and repos.json | length > 0) or "git.megaphonetech.com" not in git_repo_url
-  tags: civicrm.settings.php,settings.php,wp-config.php
+- name: Set the .gitignore
+  ansible.builtin.template:
+    src: templates/{{ cms|lower }}-gitignore.j2
+    dest: "{{ gitroot }}/.gitignore"
+  become_user: "{{ run_as_user }}"
+  when: cms != 'Other' and env == 'Dev'
+  tags: gitignore
+
+# Tasks for blank sites regardless of CMS
+- name: Tasks for all fresh sites
+  include_tasks: blank-site.yml
+  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names)
+  tags: civicrm.settings.php
 
 - name: git config - user/email
   blockinfile:
@@ -56,14 +70,6 @@
         name = {{ run_as_user }} on {{ inventory_hostname }}
   become: yes
   become_user: "{{ run_as_user }}"
-
-- name: Set the .gitignore
-  ansible.builtin.template:
-    src: templates/{{ cms|lower }}-gitignore.j2
-    dest: "{{ gitroot }}/.gitignore"
-  become_user: "{{ run_as_user }}"
-  when: cms != 'Other' and env == 'Dev'
-  tags: gitignore
 
 - name: git add
   command: git add -A
@@ -83,12 +89,6 @@
   failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
   become_user: "{{ run_as_user }}"
   tags: git-add-commit-push
-
-# Tasks for blank sites regardless of CMS
-- name: Tasks for all fresh sites
-  include_tasks: blank-site.yml
-  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names)
-  tags: civicrm.settings.php
 
 - name: Make sure we can use htpasswd module
   apt: "pkg=python3-passlib state=present"
