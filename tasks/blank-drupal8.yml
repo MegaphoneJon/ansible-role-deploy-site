@@ -39,6 +39,7 @@
     - restart apache
     - restart php-fpm
 
+# Is this necessary here, since we handle it in blank-site.yml now?
 - name: Get table names for Views integration
   command: "mysql -u{{ db_user }} -p{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {{ crm_db_name }} --skip-column-names --silent -e 'show tables'"
   register: civi_table_names
