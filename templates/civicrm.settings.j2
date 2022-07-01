@@ -304,8 +304,15 @@ if (!defined('CIVICRM_SITE_KEY')) {
  * More info at https://docs.civicrm.org/sysadmin/en/latest/setup/cred-key/
  */
 if (!defined('CIVICRM_CRED_KEYS') ) {
-  define( '_CIVICRM_CRED_KEYS', '::{{ lookup('passwordstore', client + '/civicrmcredkey create=true length=32 nosymbols=yes') }}');
+  define( '_CIVICRM_CRED_KEYS', 'aes-cbc::{{ lookup('passwordstore', client + '/civicrmcredkey create=true length=32 nosymbols=yes') }}');
   define( 'CIVICRM_CRED_KEYS', _CIVICRM_CRED_KEYS === '%%' . 'credKeys' . '%%' ? '' : _CIVICRM_CRED_KEYS );
+  // Some old installers may not set a decent value, and this extra complexity is a failsafe.
+  // Feel free to simplify post-install.
+}
+
+if (!defined('CIVICRM_SIGN_KEYS') ) {
+  define( '_CIVICRM_SIGN_KEYS', 'jwt-hs256::{{ lookup('passwordstore', client + '/civicrmsignkey create=true length=32 nosymbols=yes') }}');
+  define( 'CIVICRM_SIGN_KEYS', _CIVICRM_SIGN_KEYS === '%%' . 'signKeys' . '%%' ? '' : _CIVICRM_SIGN_KEYS );
   // Some old installers may not set a decent value, and this extra complexity is a failsafe.
   // Feel free to simplify post-install.
 }
