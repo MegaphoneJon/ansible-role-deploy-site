@@ -106,6 +106,17 @@
   when: env == 'Test'
   tags: htpasswd
 
+# was in postinstall-config, but then permissions don't get applied to it.
+- name: Set a .htaccess
+  copy:
+    src: files/.htaccess
+    dest: "{{ webroot }}/.htaccess"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+  # FIXME: This isn't compatible with nosudo, and probably isn't necessary.
+  become_user: root
+  when: cms == 'WordPress'
+
 - name: git push
   command: git push
   args:
