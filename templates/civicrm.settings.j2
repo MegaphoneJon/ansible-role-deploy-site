@@ -231,6 +231,10 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  $civicrm_setting['Developer']['backtrace'] = TRUE;
  $civicrm_setting['Mailing']['mailing_backend'] = ['outBound_option' => '3'];
  $civicrm_setting['Core']['menubar_color'] = '#E22222';
+ // Disable Sparkpost if it's present.
+ $civicrm_setting['SparkPost Extension Settings']['sparkpost_apiKey'] = '';
+ $civicrm_setting['SparkPost Extension Settings']['sparkpost_useBackupMailer'] = 1;
+ $civicrm_setting['Com.cividesk.email.sparkpost']['sparkpost_customCallbackUrl'] = 'https://www.local.local';
 {% endif %}
  // Override the Temporary Files directory.
  // $civicrm_setting['Directory Preferences']['customFileUploadDir'] = '/path/to/upload';
