@@ -363,7 +363,7 @@ if (!defined('CIVICRM_EXCLUDE_DIRS_PATTERN')) {
  *
  */
 if (!defined('CIVICRM_DB_CACHE_CLASS')) {
-  define('CIVICRM_DB_CACHE_CLASS', 'ArrayCache');
+  define('CIVICRM_DB_CACHE_CLASS', '{{ caching_backend|default('ArrayCache', True) }}');
 }
 
 /**
