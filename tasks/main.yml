@@ -97,8 +97,8 @@
 - name: Add basic auth on test sites
   htpasswd:
     path: "{{ webroot }}/htpasswd"
-    name: megaphone
-    password: megaphone
+    name: "{{ basic_auth_name }}"
+    password: "{{ basic_auth_password }}"
     owner: root
     group: www-data
     mode: 0640
