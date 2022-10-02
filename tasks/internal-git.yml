@@ -74,13 +74,22 @@
 #TODO: Create the config folders for Backdrop/D8 with appropriate owner/perms
 # config/active, config/staging, both owned/writable by run_as_user
 
-- name: Add settings.php
+- name: Add settings.php - all Drupals
   template:
     src: templates/{{ cms }}-settings.j2
     dest: "{{ webroot }}/sites/default/settings.php"
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
-  when: (cms == 'Drupal' or cms == 'Drupal8' or cms == 'Backdrop')  and 'pantheon' not in group_names
+  when: (cms == 'Drupal' or cms == 'Drupal8') and 'pantheon' not in group_names
+  tags: settings.php
+
+- name: Add settings.php - Backdrop
+  template:
+    src: templates/{{ cms }}-settings.j2
+    dest: "{{ webroot }}/settings.php"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+  when: cms == 'Backdrop'  and 'pantheon' not in group_names
   tags: settings.php
 
 - name: Create wp-config.php
