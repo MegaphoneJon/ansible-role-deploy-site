@@ -117,6 +117,25 @@
   become_user: root
   when: cms == 'WordPress'
 
+- name: git add
+  command: git add -A
+  args:
+    chdir: "{{ gitroot }}"
+  register: add_result
+  changed_when: add_result.stdout != ''
+  become_user: "{{ run_as_user }}"
+  tags: git-add-commit-push
+
+- name: git commit
+  command: git commit -m "updated .htaccess"
+  args:
+    chdir: "{{ gitroot }}"
+  register: commit_result
+  changed_when: commit_result.rc == 0
+  failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
+  become_user: "{{ run_as_user }}"
+  tags: git-add-commit-push
+
 - name: git push
   command: git push
   args:
