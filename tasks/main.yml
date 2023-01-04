@@ -35,17 +35,17 @@
 # Build a new WP site
 - name: Create fresh WordPress site
   include_tasks: blank-wp.yml
-  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names)  and cms == 'WordPress'
+  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names)  and cms == 'WordPress' and 'git.megaphonetech.com' in git_repo_url
 
 # Build a new D7 site
 - name: Create fresh Drupal 7 site
   include_tasks: blank-drupal7.yml
-  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names) and cms == 'Drupal'
+  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names) and cms == 'Drupal' and 'git.megaphonetech.com' in git_repo_url
 
 # Build a new D8 site
 - name: Create fresh Drupal 8 site
   include_tasks: blank-drupal8.yml
-  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names) and cms == 'Drupal8'
+  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names) and cms == 'Drupal8' and 'git.megaphonetech.com' in git_repo_url
 
 - name: Set the .gitignore
   ansible.builtin.template:
@@ -97,8 +97,8 @@
 - name: Add basic auth on test sites
   htpasswd:
     path: "{{ webroot }}/htpasswd"
-    name: "{{ basic_auth_name }}"
-    password: "{{ basic_auth_password }}"
+    name: "{{ basic_auth_name | default(default_basic_auth_name,true) }}"
+    password: "{{ basic_auth_password | default(default_basic_auth_password,true) }}"
     owner: root
     group: www-data
     mode: 0640
