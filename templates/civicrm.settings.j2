@@ -511,7 +511,8 @@ switch ($memLimitUnit) {
     case 'm': $memLimit *= 1024;
     case 'k': $memLimit *= 1024;
 }
-if ($memLimit >= 0 and $memLimit < 134217728) {
+// Experimenting with PHP_SAPI since some servers I don't control seem to have squirrelly settings.
+if ($memLimit >= 0 and $memLimit < 134217728 and PHP_SAPI !== 'cli') {
     ini_set('memory_limit', '128M');
 }
 
