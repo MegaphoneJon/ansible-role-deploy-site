@@ -517,9 +517,9 @@ if ($memLimit >= 0 and $memLimit < 134217728 and PHP_SAPI !== 'cli') {
 }
 
 {% if canonical_bare_url is not none %}
-{% include "files/" + canonical_bare_url + "/civicrm.setting.php-include.j2" ignore missing %}
+{% include "files/" + canonical_bare_url + "/civicrm.settings.php-include.j2" ignore missing %}
 {% else %}
-{% include "files/" + bare_url + "/civicrm.setting.php-include.j2" ignore missing %}
+{% include "files/" + bare_url + "/civicrm.settings.php-include.j2" ignore missing %}
 {% endif %}
 
 require_once 'CRM/Core/ClassLoader.php';
