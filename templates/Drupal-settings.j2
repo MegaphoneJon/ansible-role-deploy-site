@@ -290,7 +290,7 @@ $update_free_access = FALSE;
  *   $drupal_hash_salt = file_get_contents('/home/example/salt.txt');
  *
  */
-$drupal_hash_salt = 'nfpZBOu9kxKkzWV5hyWE8sz05GahWlUsPXuhfojsyOA';
+$drupal_hash_salt = '';
 
 /**
  * Base URL (optional).
@@ -650,6 +650,13 @@ $databases['default']['default']['prefix']= array(
 {% endfor %}
 );
 {% endif %}
+
+{% if canonical_bare_url is not none %}
+{% include "files/" + canonical_bare_url + "/settings.php-include.j2" ignore missing %}
+{% else %}
+{% include "files/" + bare_url + "/settings.php-include.j2" ignore missing %}
+{% endif %}
+
 
 {% if env == 'Dev' %}
 $conf['environment_indicator_overwrite'] = TRUE;
