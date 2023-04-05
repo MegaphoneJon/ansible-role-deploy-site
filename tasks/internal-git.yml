@@ -108,6 +108,8 @@
       define( 'WP_SITEURL', '{{ primary_url }}' );
       define( 'WP_HOME', '{{ primary_url }}' );
       define( 'HABITAT_ENVIRONMENT', '{{ env }}' );
+      define( 'WP_CACHE', "{{ (env == 'Dev') | ternary(false, true) }}" );
+      define( 'WPO_ADVANCED_CACHE', "{{ (env == 'Dev') | ternary(false, true) }}" );
   become_user: "{{ run_as_user }}"
   when: cms == 'WordPress' and 'pantheon' not in group_names
   tags: wp-config.php
