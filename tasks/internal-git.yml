@@ -13,6 +13,7 @@
     umask: "{{ umask }}"
     track_submodules: no
   become_user: "{{ run_as_user }}"
+  become: yes
 
 - name: set an HTTP git push URL
   git_config:
@@ -21,6 +22,7 @@
     scope: local
     repo: "{{ gitroot }}"
   become_user: "{{ run_as_user }}"
+  become: yes
   when: (env == 'Test' or env == 'Live') and git_repo_name is not none
 
 - name: Composer install (D8)
@@ -29,6 +31,7 @@
     working_dir: "{{ gitroot }}"
   when: cms == "Drupal8"
   become_user: "{{ run_as_user }}"
+  become: yes
 
 - name: Create CiviCRM uploads folder
   file:
@@ -36,6 +39,7 @@
     state: directory
   when: civicrm == 'Yes'
   become_user: "{{ run_as_user }}"
+  become: yes
 
 - name: Add civicrm.settings.php
   template:
@@ -45,6 +49,7 @@
     group: "{{ run_as_user }}"
     mode: 0660
   become_user: root
+  become: yes
   when: civicrm == 'Yes'
   tags: civicrm.settings.php
 
@@ -55,6 +60,7 @@
     mode: g+w
     recurse: yes
   become_user: root
+  become: yes
   when: civicrm == 'Yes'
 
 - name: Get table names for Views integration
@@ -80,6 +86,7 @@
     dest: "{{ webroot }}/sites/default/settings.php"
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
+  become: yes
   when: (cms == 'Drupal' or cms == 'Drupal8') and 'pantheon' not in group_names
   tags: settings.php
 
@@ -96,6 +103,7 @@
   shell: |
     wp config create --force --dbname={{ cms_db_name }} --dbuser={{ db_user }} --dbpass={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {% if cms_table_prefix|default('blank', True) != 'blank' %}--dbprefix={{ cms_table_prefix}}{% endif %} --path={{ webroot }}
   become_user: "{{ run_as_user }}"
+  become: yes
   when: cms == 'WordPress' and 'pantheon' not in group_names
   tags: wp-config.php
 
@@ -111,6 +119,7 @@
       define( 'WP_CACHE', "{{ (env == 'Dev') | ternary(false, true) }}" );
       define( 'WPO_ADVANCED_CACHE', "{{ (env == 'Dev') | ternary(false, true) }}" );
   become_user: "{{ run_as_user }}"
+  become: yes
   when: cms == 'WordPress' and 'pantheon' not in group_names
   tags: wp-config.php
 
@@ -125,6 +134,7 @@
       define( 'WPMS_ON', TRUE );
       define( 'WPMS_MAILER', 'mail' );
   become_user: "{{ run_as_user }}"
+  become: yes
   when: cms == 'WordPress' and 'pantheon' not in group_names and env == 'Dev'
   tags: wp-config.php
 

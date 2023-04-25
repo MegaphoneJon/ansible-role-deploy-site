@@ -22,6 +22,7 @@
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
   become_user: root
+  become: yes
 
 - name: Create a site key
   set_fact: dontcare="{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/sitekey create=true length=32 nosymbols=yes') }}"
