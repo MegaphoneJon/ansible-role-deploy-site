@@ -674,6 +674,8 @@ $conf['environment_indicator_overwritten_color'] = '#E29522';
 error_reporting(E_ALL);
 ini_set('display_errors', TRUE);
 ini_set('display_startup_errors', TRUE);
+$conf['cron_threshold_warning'] = 999999999;
+$conf['cron_threshold_error'] = 999999999;
 {% endif %}
 
 {% if domain_access_path.stdout is defined and domain_access_path.stdout != '' %}
