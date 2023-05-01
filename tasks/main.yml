@@ -69,6 +69,8 @@
       [user]
         email = none@megaphonetech.com
         name = {{ run_as_user }} on {{ inventory_hostname }}
+      [safe]
+        directory = {{ gitroot }}
   become: yes
   become_user: "{{ run_as_user }}"
 
@@ -104,6 +106,7 @@
     group: www-data
     mode: 0640
   become_user: root
+  become: yes
   when: env == 'Test'
   tags: htpasswd
 
@@ -116,6 +119,7 @@
     group: "{{ run_as_user }}"
   # FIXME: This isn't compatible with nosudo, and probably isn't necessary.
   become_user: root
+  become: yes
   when: cms == 'WordPress'
 
 - name: git add
@@ -143,6 +147,7 @@
     chdir: "{{ gitroot }}"
   register: push_result_addl
   become_user: "{{ run_as_user }}"
+  become: yes
   when: internal_repo == "1" and (git_repo_push_url is search("ssh://"))
   changed_when: push_result_addl.rc == 0 and push_result_addl.stderr != 'Everything up-to-date'
   failed_when: not(push_result_addl.rc == 0)
