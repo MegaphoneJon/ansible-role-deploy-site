@@ -48,8 +48,6 @@
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
     mode: 0660
-  become_user: root
-  become: yes
   when: civicrm == 'Yes'
   tags: civicrm.settings.php
 
