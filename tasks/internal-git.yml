@@ -38,8 +38,6 @@
     path: "{{ civicrm_settings_php_path }}"
     state: directory
   when: civicrm == 'Yes'
-  become_user: "{{ run_as_user }}"
-  become: yes
 
 - name: Add civicrm.settings.php
   template:
@@ -48,6 +46,7 @@
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
     mode: 0660
+  become: "{{ 'no' if run_as_user == ansible_user else 'yes' }}"
   when: civicrm == 'Yes'
   tags: civicrm.settings.php
 
