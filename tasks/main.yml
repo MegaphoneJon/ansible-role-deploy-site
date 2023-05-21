@@ -30,23 +30,23 @@
 # For building site from an existing git repo
 - name: Build sites from existing git repo
   include_tasks: internal-git.yml
-  when: (internal_repo == "1" and repos.json | length > 0) or "git.megaphonetech.com" not in git_repo_url
+  when: (internal_repo == "1" and repos.json != None) or "git.megaphonetech.com" not in git_repo_url
   tags: civicrm.settings.php,settings.php,wp-config.php
 
 # Build a new WP site
 - name: Create fresh WordPress site
   include_tasks: blank-wp.yml
-  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names)  and cms == 'WordPress' and 'git.megaphonetech.com' in git_repo_url
+  when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names)  and cms == 'WordPress' and 'git.megaphonetech.com' in git_repo_url
 
 # Build a new D7 site
 - name: Create fresh Drupal 7 site
   include_tasks: blank-drupal7.yml
-  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names) and cms == 'Drupal' and 'git.megaphonetech.com' in git_repo_url
+  when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names) and cms == 'Drupal' and 'git.megaphonetech.com' in git_repo_url
 
 # Build a new D8 site
 - name: Create fresh Drupal 8 site
   include_tasks: blank-drupal8.yml
-  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names) and cms == 'Drupal8' and 'git.megaphonetech.com' in git_repo_url
+  when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names) and cms == 'Drupal8' and 'git.megaphonetech.com' in git_repo_url
 
 - name: Set the .gitignore
   ansible.builtin.template:
@@ -59,7 +59,7 @@
 # Tasks for blank sites regardless of CMS
 - name: Tasks for all fresh sites
   include_tasks: blank-site.yml
-  when: (( internal_repo != "1" or repos.json | length == 0) and 'pantheon' not in group_names)
+  when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names)
   tags: civicrm.settings.php
 
 - name: git config - user/email
@@ -72,6 +72,21 @@
       [safe]
         directory = {{ gitroot }}
   become: yes
+  become_user: "{{ run_as_user }}"
+
+- name: Allow access to git repo for ansible user
+  command: "git config --global --add safe.directory {{ gitroot }}"
+  args:
+    chdir: "{{ gitroot }}"
+  become: "{{ 'no' if run_as_user == ansible_user else 'yes' }}"
+  become_user: "{{ ansible_user }}"
+
+# FIXME: Is this necessary? They already own the repo
+- name: Allow access to git repo for run_as_user
+  command: "git config --global --add safe.directory {{ gitroot }}"
+  args:
+    chdir: "{{ gitroot }}"
+  become: "{{ 'no' if run_as_user == ansible_user else 'yes' }}"
   become_user: "{{ run_as_user }}"
 
 - name: git add
