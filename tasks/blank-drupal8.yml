@@ -1,20 +1,27 @@
-- name: Get the latest CiviCRM version number
-  uri:
-    url: http://latest.civicrm.org/stable.php
-    return_content: yes
-  run_once: true
-  register: civi_ver
-  become: true
+# - name: Get the latest CiviCRM version number
+#   uri:
+#     url: http://latest.civicrm.org/stable.php
+#     return_content: yes
+#   run_once: true
+#   register: civi_ver
+#   become: true
 
-- name: Push the composer.json template
-  template:
-    src: templates/composer.j2
-    dest: "{{ gitroot }}/composer.json"
-    owner: "{{ run_as_user }}"
-    group: "{{ run_as_user }}"
-    mode: 0660
-  become_user: root
-  when: civicrm == 'Yes'
+# - name: Push the composer.json template
+#   template:
+#     src: templates/composer.j2
+#     dest: "{{ gitroot }}/composer.json"
+#     owner: "{{ run_as_user }}"
+#     group: "{{ run_as_user }}"
+#     mode: 0660
+#   become_user: root
+#   when: civicrm == 'Yes'
+
+# FIXME: D10 install is:
+# composer create-project drupal/recommended-project:10.0.0 "install-dir"
+# composer update "drupal/core-*" --with-all-dependencies
+# composer config --json extra.drupal-scaffold.file-mapping '{"[web-root]/.htaccess": false, "[web-root]/robots.txt": false}'
+# composer require drush/drush
+# That does NOT include Civi core install
 
 - name: composer install
   composer:
