@@ -33,6 +33,7 @@
   when: civicrm == 'Yes'
   become_user: "{{ run_as_user }}"
 
+# FIXME: When can we do this? As root, yes. On May First, no. What about other nosudo situations? Probably not, huh.
 - name: Set file permissions
   file:
     dest: "{{ webroot }}"
@@ -40,7 +41,7 @@
     group: "{{ run_as_user }}"
     recurse: yes
     mode: ug=rwX
-  become_user: root
+  when: "{{ false if run_as_user == ansible_user else true }}"
 
 - name: Run cv core:install
   command: "cv -n core:install --db=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}@localhost/{{ crm_db_name }} --cms-base-url={{ primary_url }}"
@@ -59,7 +60,6 @@
     group: "{{ run_as_user }}"
     mode: 0660
   when: civicrm == 'Yes'
-  become_user: root
   tags: civicrm.settings.php
 
 - name: Get table names for Views integration
@@ -75,7 +75,6 @@
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
     mode: 0660
-  become_user: root
   when: civicrm == 'Yes' and (cms == 'Drupal' or cms == 'Drupal8')
 
 - block:
@@ -136,7 +135,7 @@
     changed_when: commit_result.rc == 0
     failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
     become_user: "{{ run_as_user }}"
-  when: git_repo_name is not none
+  when: git_repo_url is not none
 
 # it seems like running git commands in Ansible is buggy, leads to files being owned by root.
 - name: Set file permissions (again)
@@ -184,4 +183,4 @@
     changed_when: push_result.rc == 0
     failed_when: not(push_result.rc == 0)
     become_user: "{{ run_as_user }}"
-  when: git_repo_name is not none
+  when: git_repo_push_url is not none

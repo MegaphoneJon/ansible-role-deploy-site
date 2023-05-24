@@ -23,6 +23,7 @@
       define( 'WP_CACHE', "{{ (env == 'Dev') | ternary(false, true) }}" );
       define( 'WPO_ADVANCED_CACHE', "{{ (env == 'Dev') | ternary(false, true) }}" );
   become_user: "{{ run_as_user }}"
+  when: cms == 'WordPress' and 'pantheon' not in group_names
 
 - name: Additional wp-config.php settings (for dev site)
   ansible.builtin.blockinfile:
@@ -35,6 +36,7 @@
       define( 'WPMS_ON', TRUE );
       define( 'WPMS_MAILER', 'mail' );
   become_user: "{{ run_as_user }}"
+  when: cms == 'WordPress' and 'pantheon' not in group_names and env == 'Dev'
 
 - name: Run the WP installer
   command: "wp core install --url={{ bare_url }} --title='{{ site_title }}' --admin_user=admin --admin_email={{ admin_email }} --admin_password={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/admin create=true length=32') }}  --path={{ webroot }}"
