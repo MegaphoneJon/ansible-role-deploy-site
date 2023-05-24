@@ -18,11 +18,15 @@
   file:
     path: "{{ gitroot }}"
     state: directory
+
+- name: Create the folder hierarchy (with correct owner/group if root)
+  file:
+    path: "{{ gitroot }}"
+    state: directory
     mode: 02770
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
-  become_user: root
-  become: yes
+  when: run_as_user != ansible_user
 
 - name: Create a site key
   set_fact: dontcare="{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/sitekey create=true length=32 nosymbols=yes') }}"
@@ -34,9 +38,9 @@
   tags: civicrm.settings.php,settings.php,wp-config.php
 
 # Build a new WP site
-- name: Create fresh WordPress site
-  include_tasks: blank-wp.yml
-  when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names)  and cms == 'WordPress' and 'git.megaphonetech.com' in git_repo_url
+# - name: Create fresh WordPress site
+#   include_tasks: blank-wp.yml
+#   when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names)  and cms == 'WordPress' and 'git.megaphonetech.com' in git_repo_url
 
 # Build a new D7 site
 - name: Create fresh Drupal 7 site
@@ -71,14 +75,12 @@
         name = {{ run_as_user }} on {{ inventory_hostname }}
       [safe]
         directory = {{ gitroot }}
-  become: yes
   become_user: "{{ run_as_user }}"
 
 - name: Allow access to git repo for ansible user
   command: "git config --global --add safe.directory {{ gitroot }}"
   args:
     chdir: "{{ gitroot }}"
-  become: "{{ 'no' if run_as_user == ansible_user else 'yes' }}"
   become_user: "{{ ansible_user }}"
 
 # FIXME: Is this necessary? They already own the repo
@@ -86,7 +88,6 @@
   command: "git config --global --add safe.directory {{ gitroot }}"
   args:
     chdir: "{{ gitroot }}"
-  become: "{{ 'no' if run_as_user == ansible_user else 'yes' }}"
   become_user: "{{ run_as_user }}"
 
 - name: git add
@@ -121,7 +122,6 @@
     group: www-data
     mode: 0640
   become_user: root
-  become: yes
   when: env == 'Test'
   tags: htpasswd
 
@@ -134,7 +134,6 @@
     group: "{{ run_as_user }}"
   # FIXME: This isn't compatible with nosudo, and probably isn't necessary.
   become_user: root
-  become: yes
   when: cms == 'WordPress'
 
 - name: git add
@@ -162,7 +161,6 @@
     chdir: "{{ gitroot }}"
   register: push_result_addl
   become_user: "{{ run_as_user }}"
-  become: yes
   when: internal_repo == "1" and (git_repo_push_url is search("ssh://"))
   changed_when: push_result_addl.rc == 0 and push_result_addl.stderr != 'Everything up-to-date'
   failed_when: not(push_result_addl.rc == 0)
