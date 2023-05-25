@@ -836,6 +836,12 @@ $settings['trusted_host_patterns'] = [
 $config['environment_indicator.indicator']['bg_color'] = '#E22222';
 $config['environment_indicator.indicator']['name'] = 'Development';
 $config['system.logging']['error_level'] = 'verbose';
+
+$config['smtp.settings']['smtp_host'] = '127.0.0.1';
+$config['smtp.settings']['smtp_autotls'] = FALSE;
+$config['smtp.settings']['smtp_port'] = 25;
+$config['smtp.settings']['smtp_username'] = '';
+$config['smtp.settings']['smtp_password'] = '';
 {% endif %}
 
 
