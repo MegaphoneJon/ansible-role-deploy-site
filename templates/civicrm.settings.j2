@@ -418,7 +418,7 @@ if (!defined('CIVICRM_DB_CACHE_TIMEOUT')) {
  * 'server2_' for the second server.
  */
 if (!defined('CIVICRM_DB_CACHE_PREFIX')) {
-  define('CIVICRM_DB_CACHE_PREFIX', '');
+  define('CIVICRM_DB_CACHE_PREFIX', '{{ bare_url }}_');
 }
 
 /**
