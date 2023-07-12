@@ -108,6 +108,7 @@
 - name: Make sure we can use htpasswd module
   apt: "pkg=python3-passlib state=present"
   tags: htpasswd
+  when: run_as_user != ansible_user
 
 - name: Add basic auth on test sites
   htpasswd:
