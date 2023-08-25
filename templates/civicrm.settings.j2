@@ -224,6 +224,7 @@ if (!defined('CIVICRM_UF_BASEURL')) {
 {% if env == 'Test' %}
  $civicrm_setting['Developer']['environment'] = 'Staging';
  $civicrm_setting['Core']['menubar_color'] = '#E29522';
+ $civicrm_setting['Mailing']['mailing_backend'] = ['outBound_option' => '2'];
  define('CIVICRM_TEMPLATE_COMPILE_CHECK', FALSE);
 {% elif env == 'Dev' %}
  $civicrm_setting['Developer']['environment'] = 'Development';
@@ -231,6 +232,8 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  $civicrm_setting['Developer']['backtrace'] = TRUE;
  $civicrm_setting['Mailing']['mailing_backend'] = ['outBound_option' => '3'];
  $civicrm_setting['Core']['menubar_color'] = '#E22222';
+{% endif %}
+{% if env != 'Live' %}
  // Disable Sparkpost if it's present.
  $civicrm_setting['SparkPost Extension Settings']['sparkpost_apiKey'] = 'incorrectKey';
  $civicrm_setting['SparkPost Extension Settings']['sparkpost_useBackupMailer'] = 1;
