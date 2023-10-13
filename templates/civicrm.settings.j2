@@ -222,16 +222,18 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  global $civicrm_setting;
 
 {% if env == 'Test' %}
- $civicrm_setting['Developer']['environment'] = 'Staging';
- $civicrm_setting['Core']['menubar_color'] = '#E29522';
- $civicrm_setting['Mailing']['mailing_backend'] = ['outBound_option' => '2'];
+ $civicrm_setting['domain']['environment'] = 'Staging';
+ $civicrm_setting['domain']['menubar_color'] = '#E29522';
+ $civicrm_setting['domain']['mailing_backend'] = ['outBound_option' => '2'];
  define('CIVICRM_TEMPLATE_COMPILE_CHECK', FALSE);
 {% elif env == 'Dev' %}
- $civicrm_setting['Developer']['environment'] = 'Development';
- $civicrm_setting['Developer']['debug_enabled'] = TRUE;
- $civicrm_setting['Developer']['backtrace'] = TRUE;
- $civicrm_setting['Mailing']['mailing_backend'] = ['outBound_option' => '3'];
- $civicrm_setting['Core']['menubar_color'] = '#E22222';
+ $civicrm_setting['domain']['prevNextBackend'] = 'default';
+ $civicrm_setting['domain']['environment'] = 'Development';
+ $civicrm_setting['domain']['debug_enabled'] = TRUE;
+ $civicrm_setting['domain']['backtrace'] = TRUE;
+ $civicrm_setting['domain']['mailing_backend'] = ['outBound_option' => '3'];
+ $civicrm_setting['domain']['menubar_color'] = '#E22222';
+ $civicrm_setting['domain']['menubar_color'] = '#E22222';
 {% endif %}
 {% if env != 'Live' %}
  // Disable Sparkpost if it's present.
@@ -240,40 +242,40 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  $civicrm_setting['Com.cividesk.email.sparkpost']['sparkpost_customCallbackUrl'] = 'https://www.local.local';
 {% endif %}
  // Override the Temporary Files directory.
- // $civicrm_setting['Directory Preferences']['customFileUploadDir'] = '/path/to/upload';
+ // $civicrm_setting['domain']['customFileUploadDir'] = '/path/to/upload';
 
  // Override the custom files upload directory.
- // $civicrm_setting['Directory Preferences']['uploadDir'] = '/path/to/upload-dir' ;
+ // $civicrm_setting['domain']['uploadDir'] = '/path/to/upload-dir' ;
 
  // Override the images directory.
- // $civicrm_setting['Directory Preferences']['imageUploadDir'] = '/path/to/image-upload-dir' ;
+ // $civicrm_setting['domain']['imageUploadDir'] = '/path/to/image-upload-dir' ;
 
  // Override the custom templates directory.
- $civicrm_setting['Directory Preferences']['customTemplateDir'] = '[cms.root]/{{ civicrm_custom_path }}/templates/';
+ $civicrm_setting['domain']['customTemplateDir'] = '[cms.root]/{{ civicrm_custom_path }}/templates/';
 
  // Override the Custom php path directory.
- $civicrm_setting['Directory Preferences']['customPHPPathDir'] = '[cms.root]/{{ civicrm_custom_path }}/';
+ $civicrm_setting['domain']['customPHPPathDir'] = '[cms.root]/{{ civicrm_custom_path }}/';
 
  // Override the extensions directory.
- $civicrm_setting['Directory Preferences']['extensionsDir'] = '[cms.root]/{{ civicrm_custom_path }}/extensions/';
+ $civicrm_setting['domain']['extensionsDir'] = '[cms.root]/{{ civicrm_custom_path }}/extensions/';
 
  // Override the resource url
- // $civicrm_setting['URL Preferences']['userFrameworkResourceURL'] = 'https://example.com/example-resource-url/';
+ // $civicrm_setting['domain']['userFrameworkResourceURL'] = 'https://example.com/example-resource-url/';
 
  // Override the Image Upload URL (System Settings > Resource URLs)
- // $civicrm_setting['URL Preferences']['imageUploadURL'] = 'https://example.com/example-image-upload-url';
+ // $civicrm_setting['domain']['imageUploadURL'] = 'https://example.com/example-image-upload-url';
 
  // Override the Custom CiviCRM CSS URL
- // $civicrm_setting['URL Preferences']['customCSSURL'] = 'https://example.com/example-css-url' ;
+ // $civicrm_setting['domain']['customCSSURL'] = 'https://example.com/example-css-url' ;
 
  // Override the extensions resource URL
- $civicrm_setting['URL Preferences']['extensionsURL'] = '[cms.root]/{{ civicrm_custom_path }}/extensions';
+ $civicrm_setting['domain']['extensionsURL'] = '[cms.root]/{{ civicrm_custom_path }}/extensions';
 
  // Disable display of Community Messages on home dashboard
- // $civicrm_setting['CiviCRM Preferences']['communityMessagesUrl'] = false;
+ // $civicrm_setting['domain']['communityMessagesUrl'] = false;
 
  // Disable automatic download / installation of extensions
- // $civicrm_setting['Extension Preferences']['ext_repo_url'] = false;
+ // $civicrm_setting['domain']['ext_repo_url'] = false;
 
  // Override the CMS root path defined by cmsRootPath.
  // define('CIVICRM_CMSDIR', '/path/to/install/root/');
