@@ -832,6 +832,12 @@ $settings['trusted_host_patterns'] = [
   '^{{ bare_url }}$',
 ];
 
+{% if canonical_bare_url is not none %}
+{% include "files/" + canonical_bare_url + "/settings.php-include.j2" ignore missing %}
+{% else %}
+{% include "files/" + bare_url + "/settings.php-include.j2" ignore missing %}
+{% endif %}
+
 {% if env == 'Dev' %}
 $config['environment_indicator.indicator']['bg_color'] = '#E22222';
 $config['environment_indicator.indicator']['name'] = 'Development';
