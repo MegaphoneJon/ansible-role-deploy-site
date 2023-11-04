@@ -1,37 +1,31 @@
-# - name: Get the latest CiviCRM version number
-#   uri:
-#     url: http://latest.civicrm.org/stable.php
-#     return_content: yes
-#   run_once: true
-#   register: civi_ver
-#   become: true
-
-# - name: Push the composer.json template
-#   template:
-#     src: templates/composer.j2
-#     dest: "{{ gitroot }}/composer.json"
-#     owner: "{{ run_as_user }}"
-#     group: "{{ run_as_user }}"
-#     mode: 0660
-#   become_user: root
-#   when: civicrm == 'Yes'
-
-# FIXME: D10 install is:
-# composer create-project drupal/recommended-project:10.0.0 "install-dir"
-# composer update "drupal/core-*" --with-all-dependencies
-# composer config --json extra.drupal-scaffold.file-mapping '{"[web-root]/.htaccess": false, "[web-root]/robots.txt": false}'
-# composer require drush/drush
-# That does NOT include Civi core install
-
-- name: composer install
+- name: composer create-project
   composer:
-    command: update
+    command: create-project
+    arguments: drupal/recommended-project "{{ gitroot }}"
+    working_dir: "{{ gitroot }}/.."
+  become_user: "{{ run_as_user }}"
+
+- name: escape this JSON
+  set_fact:
+    file_mapping: "{{ {'[web-root]/.htaccess': false, '[web-root]/robots.txt': false} | to_json }}"
+
+- name: Don't touch .htaccess or robots.txt
+  composer:
+    command: config
+    arguments: "--json extra.drupal-scaffold.file-mapping '{{ file_mapping }}'"
+    working_dir: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+
+- name: drush
+  composer:
+    command: require
+    arguments: drush/drush
     working_dir: "{{ gitroot }}"
   become_user: "{{ run_as_user }}"
 
 - name: Install Drupal with drush.
   command: >
-    drush site-install standard -y
+    {{ gitroot }}/vendor/bin/drush site-install standard -y
     --root={{ webroot}}
     --site-name="{{ site_title }}"
     --sites-subdir=default
@@ -46,13 +40,6 @@
     - restart apache
     - restart php-fpm
 
-# Is this necessary here, since we handle it in blank-site.yml now?
-- name: Get table names for Views integration
-  command: "mysql -u{{ db_user }} -p{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {{ crm_db_name }} --skip-column-names --silent -e 'SHOW TABLES LIKE \"civi%\"'"
-  register: civi_table_names
-  when: (cms == 'Drupal' or cms == 'Drupal8' or cms == 'Backdrop') and civicrm == 'Yes'
-  changed_when: false
-
 - name: Push the settings.php template
   template:
     src: "templates/{{ cms }}-settings.j2"
@@ -61,3 +48,46 @@
     group: "{{ run_as_user }}"
     mode: 0660
   become_user: root
+
+- name: Enable composer patching
+  composer:
+    command: config
+    arguments: --no-plugins allow-plugins.cweagans/composer-patches true
+    working_dir: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+
+- name: Enable Civi asset plugin
+  composer:
+    command: config
+    arguments: --no-plugins allow-plugins.civicrm/civicrm-asset-plugin true
+    working_dir: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+
+- name: Enable Civi downloads plugin
+  composer:
+    command: config
+    arguments: --no-plugins allow-plugins.civicrm/composer-downloads-plugin true
+    working_dir: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+
+- name: Enable Civi compile plugin
+  composer:
+    command: config
+    arguments: --no-plugins allow-plugins.civicrm/composer-compile-plugin true
+    working_dir: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+
+- name: Whitelist Civi compile plugins
+  composer:
+    command: config
+    arguments: --json extra.compile-whitelist  '[ "civicrm/composer-compile-lib", "civicrm/civicrm-core" ]'
+    working_dir: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+
+- name: Install CiviCRM
+  composer:
+    command: require
+    arguments: civicrm/civicrm-core civicrm/civicrm-packages civicrm/civicrm-drupal-8
+    working_dir: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+  when: civicrm == 'Yes'
