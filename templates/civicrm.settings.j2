@@ -28,6 +28,7 @@
 /**
  * CiviCRM Configuration File.
  */
+global $civicrm_root, $civicrm_setting, $civicrm_paths;
 
 /**
  * Content Management System (CMS) Host:
@@ -170,7 +171,6 @@ if (!defined('CIVICRM_LOGGING_DSN')) {
  */
 
 define('CIVICRM_CMSDIR', '{{ webroot }}');
-global $civicrm_root;
 
 $civicrm_root = '{{ civiroot }}/';
 if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
@@ -217,10 +217,11 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  * Define any CiviCRM Settings Overrides per http://wiki.civicrm.org/confluence/display/CRMDOC/Override+CiviCRM+Settings
  *
  * Uncomment and edit the below as appropriate.
- */
- // Add this line only once above any settings overrides.
- global $civicrm_setting;
-
+*/
+{# This is needed for bee to work without throwing an error #}
+{% if cms == 'Backdrop' %}
+ $civicrm_paths['cms.root']['path'] = "{{ webroot }}";
+{% endif %}
 {% if env == 'Test' %}
  $civicrm_setting['domain']['environment'] = 'Staging';
  $civicrm_setting['domain']['menubar_color'] = '#E29522';
