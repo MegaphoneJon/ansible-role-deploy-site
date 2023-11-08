@@ -237,10 +237,11 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  $civicrm_setting['domain']['menubar_color'] = '#E22222';
 {% endif %}
 {% if env != 'Live' %}
- // Disable Sparkpost if it's present.
+ // Disable Sparkpost/Mandrill if present.
  $civicrm_setting['SparkPost Extension Settings']['sparkpost_apiKey'] = 'incorrectKey';
  $civicrm_setting['SparkPost Extension Settings']['sparkpost_useBackupMailer'] = 1;
  $civicrm_setting['Com.cividesk.email.sparkpost']['sparkpost_customCallbackUrl'] = 'https://www.local.local';
+ $civicrm_setting['domain']['mandrill_smtp_settings'] = [];
 {% endif %}
  // Override the Temporary Files directory.
  // $civicrm_setting['domain']['customFileUploadDir'] = '/path/to/upload';
