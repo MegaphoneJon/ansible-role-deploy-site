@@ -75,6 +75,7 @@
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
     mode: 0660
+  tags: settings.php
   when: civicrm == 'Yes' and (cms == 'Drupal' or cms == 'Drupal8')
 
 - block:
