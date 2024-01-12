@@ -468,6 +468,9 @@ if (!defined('CIVICRM_DB_CACHE_PREFIX')) {
  */
 define('CIVICRM_DEADLOCK_RETRIES', 3);
 
+// I do my own upgrades, don't want these snapshot tables.
+define('CIVICRM_UPGRADE_SNAPSHOT', FALSE);
+
 /**
  * Configure MySQL to throw more errors when encountering unusual SQL expressions.
  *
