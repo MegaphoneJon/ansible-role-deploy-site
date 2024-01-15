@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5
+ | CiviCRM version 5                                                  |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2020                                |
  +--------------------------------------------------------------------+
@@ -41,9 +41,6 @@ global $civicrm_root, $civicrm_setting, $civicrm_paths;
  * Settings for Drupal 7.x:
  *      define( 'CIVICRM_UF'        , 'Drupal');
  *
- * Settings for Drupal 6.x:
- *      define( 'CIVICRM_UF'        , 'Drupal6');
- *
  * Settings for Joomla 1.7.x - 2.5.x:
  *      define( 'CIVICRM_UF'        , 'Joomla');
  *
@@ -68,7 +65,6 @@ if (!defined('CIVICRM_UF')) {
  *
  * Update this setting with your CMS (Drupal, Backdrop CMS, or Joomla) database username, password, server and DB name.
  * If any of these contain a single quote or backslash, escape those characters with a backslash: \' and \\, respectively.
- * Update this setting with your CMS (Drupal, Backdrop CMS, or Joomla) database username, server and DB name.
  * Datasource (DSN) format:
  *      define( 'CIVICRM_UF_DSN', 'mysql://cms_db_username:cms_db_password@db_server/cms_database?new_link=true');
  */
@@ -82,6 +78,9 @@ if (!defined('CIVICRM_UF_DSN') && CIVICRM_UF !== 'UnitTests') {
  * Database URL (CIVICRM_DSN) for CiviCRM Data:
  * Database URL format:
  *      define( 'CIVICRM_DSN', 'mysql://crm_db_username:crm_db_password@db_server/crm_database?new_link=true');
+ *
+ * See https://docs.civicrm.org/installation/en/latest/general/mysql_tls/#dsn-settings for how to append
+ * ssl options to the Database URL.
  *
  * Drupal and CiviCRM can share the same database, or can be installed into separate databases.
  * Backdrop CMS and CiviCRM can also share the same database, or can be installed into separate databases.
@@ -100,8 +99,13 @@ if (!defined('CIVICRM_UF_DSN') && CIVICRM_UF !== 'UnitTests') {
  *
  */
 if (!defined('CIVICRM_DSN')) {
-  if (CIVICRM_UF === 'UnitTests' && isset($GLOBALS['_CV']['TEST_DB_DSN'])) {
-    define('CIVICRM_DSN', $GLOBALS['_CV']['TEST_DB_DSN']);
+  if (CIVICRM_UF === 'UnitTests') {
+    if (isset($GLOBALS['_CV']['TEST_DB_DSN'])) {
+      define('CIVICRM_DSN', $GLOBALS['_CV']['TEST_DB_DSN']);
+    }
+    else {
+      throw new \Exception('$GLOBALS["_CV"]["TEST_DB_DSN"] is not set');
+    }
   }
   else {
     define('CIVICRM_DSN', 'mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}@{{ db_host | default('localhost') }}/{{ crm_db_name }}?new_link=true');
@@ -214,10 +218,10 @@ if (!defined('CIVICRM_UF_BASEURL')) {
 }
 
 /**
- * Define any CiviCRM Settings Overrides per http://wiki.civicrm.org/confluence/display/CRMDOC/Override+CiviCRM+Settings
+ * Define any CiviCRM Settings Overrides per https://docs.civicrm.org/sysadmin/en/latest/customize/settings/
  *
  * Uncomment and edit the below as appropriate.
-*/
+ */
 {# This is needed for bee to work without throwing an error #}
 {% if cms == 'Backdrop' %}
  $civicrm_paths['cms.root']['path'] = "{{ webroot }}";
@@ -247,12 +251,13 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  $civicrm_setting['SparkPost Extension Settings']['sparkpost_useBackupMailer'] = 1;
  $civicrm_setting['Com.cividesk.email.sparkpost']['sparkpost_customCallbackUrl'] = 'https://www.local.local';
  $civicrm_setting['domain']['mandrill_smtp_settings'] = [];
+ define('CIVICRM_TEMPLATE_COMPILE_CHECK', FALSE);
 {% endif %}
  // Override the Temporary Files directory.
- // $civicrm_setting['domain']['customFileUploadDir'] = '/path/to/upload';
+ // $civicrm_setting['domain']['uploadDir'] = '/path/to/upload-dir' ;
 
  // Override the custom files upload directory.
- // $civicrm_setting['domain']['uploadDir'] = '/path/to/upload-dir' ;
+ // $civicrm_setting['domain']['customFileUploadDir'] = '/path/to/custom-dir';
 
  // Override the images directory.
  // $civicrm_setting['domain']['imageUploadDir'] = '/path/to/image-upload-dir' ;
@@ -267,13 +272,13 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  $civicrm_setting['domain']['extensionsDir'] = '[cms.root]/{{ civicrm_custom_path }}/extensions/';
 
  // Override the resource url
- // $civicrm_setting['domain']['userFrameworkResourceURL'] = 'https://example.com/example-resource-url/';
+ // $civicrm_setting['domain']['userFrameworkResourceURL'] = 'http://example.com/example-resource-url/';
 
  // Override the Image Upload URL (System Settings > Resource URLs)
- // $civicrm_setting['domain']['imageUploadURL'] = 'https://example.com/example-image-upload-url';
+ // $civicrm_setting['domain']['imageUploadURL'] = 'http://example.com/example-image-upload-url';
 
  // Override the Custom CiviCRM CSS URL
- // $civicrm_setting['domain']['customCSSURL'] = 'https://example.com/example-css-url' ;
+ // $civicrm_setting['domain']['customCSSURL'] = 'http://example.com/example-css-url' ;
 
  // Override the extensions resource URL
  $civicrm_setting['domain']['extensionsURL'] = '[cms.root]/{{ civicrm_custom_path }}/extensions';
@@ -292,7 +297,7 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  * If you are using any CiviCRM script in the bin directory that
  * requires authentication, then you also need to set this key.
  * We recommend using a 16-32 bit alphanumeric/punctuation key.
- * More info at http://wiki.civicrm.org/confluence/display/CRMDOC/Command-line+Script+Configuration
+ * More info at https://docs.civicrm.org/sysadmin/en/latest/setup/site-key/
  */
 if (!defined('CIVICRM_SITE_KEY')) {
   define( 'CIVICRM_SITE_KEY', "{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/sitekey create=true length=32 nosymbols=yes') }}");
@@ -322,6 +327,20 @@ if (!defined('CIVICRM_CRED_KEYS') ) {
   // Feel free to simplify post-install.
 }
 
+/**
+ * The signing key is used to generate and verify shareable tokens.
+ *
+ * This is a space-delimited list of keys (ordered by priority). Put the preferred
+ * key first. Any old/deprecated keys may be listed after.
+ *
+ * Each key is in format "<cipher-suite>:<key-encoding>:<key-content>", as in:
+ *
+ * Ex: define('CIVICRM_SIGN_KEYS', 'jwt-hs256:hkdf-sha256:RANDOM_1')
+ * Ex: define('CIVICRM_SIGN_KEYS', 'jwt-hs256::RANDOM_2 jwt-hs256::RANDOM_3')
+ * Ex: define('CIVICRM_SIGN_KEYS', 'jwt-hs256:b64:RANDOM_4 jwt-hs256:b64:RANDOM_5')
+ *
+ * If key-encoding is blank, it will default to "hkdf-sha256".
+ */
 if (!defined('CIVICRM_SIGN_KEYS') ) {
   define( '_CIVICRM_SIGN_KEYS', 'jwt-hs256::{{ lookup('passwordstore', client + '/civicrmsignkey create=true length=32 nosymbols=yes') }}');
   define( 'CIVICRM_SIGN_KEYS', _CIVICRM_SIGN_KEYS === '%%' . 'signKeys' . '%%' ? '' : _CIVICRM_SIGN_KEYS );
@@ -351,10 +370,6 @@ if (!defined('CIVICRM_MAIL_SMARTY')) {
 
 if (!defined('CIVICRM_DOMAIN_ID')) {
   define( 'CIVICRM_DOMAIN_ID', {{ multisite_domain_id | default(1, true) }});
-}
-
-if (!defined('CIVICRM_EXCLUDE_DIRS_PATTERN')) {
-   define('CIVICRM_EXCLUDE_DIRS_PATTERN', '@/(\.|node_modules|js/|css/|bower_components|packages/|sites/default/files/private)@');
 }
 
 /**
@@ -394,7 +409,9 @@ if (!defined('CIVICRM_DB_CACHE_HOST')) {
 }
 
 /**
- * Change this if you are not using the standard port for your cache server
+ * Change this if you are not using the standard port for your cache server.
+ *
+ * The standard port for Memcache & APCCache is 11211. For Redis it is 6379.
  */
 if (!defined('CIVICRM_DB_CACHE_PORT')) {
   if (CIVICRM_DB_CACHE_CLASS === 'Redis') {
@@ -434,16 +451,30 @@ if (!defined('CIVICRM_DB_CACHE_PREFIX')) {
 }
 
 /**
+ * The cache system traditionally allowed a wide range of cache-keys, but some
+ * cache-keys are prohibited by PSR-16.
+ */
+if (!defined('CIVICRM_PSR16_STRICT')) {
+  define('CIVICRM_PSR16_STRICT', FALSE);
+}
+
+/**
  * If you have multilingual site and you are using the "inherit CMS language"
  * configuration option, but wish to, for example, use fr_CA instead of the
  * default fr_FR (for French), set one or more of the constants below to an
  * appropriate regional value.
+ *
+ * Note that since 5.26.0 specifically https://github.com/civicrm/civicrm-core/pull/16700
+ * This generally doesn't get used by WordPress especially if using the Polylang plugin.
+ * The reason is that the WordPress implementation has been changed to get the full locale
+ * from the WordPress plugin rather than just the 2 string language code.
  */
 // define('CIVICRM_LANGUAGE_MAPPING_FR', 'fr_CA');
 // define('CIVICRM_LANGUAGE_MAPPING_EN', 'en_CA');
 // define('CIVICRM_LANGUAGE_MAPPING_ES', 'es_MX');
 // define('CIVICRM_LANGUAGE_MAPPING_PT', 'pt_BR');
 // define('CIVICRM_LANGUAGE_MAPPING_ZH', 'zh_TW');
+// define('CIVICRM_LANGUAGE_MAPPING_NL', 'nl_BE');
 
 /**
  * Native gettext improves performance of localized CiviCRM installations
@@ -455,7 +486,7 @@ if (!defined('CIVICRM_DB_CACHE_PREFIX')) {
  * # dpkg-reconfigure locales
  *
  * For more information:
- * http://wiki.civicrm.org/confluence/x/YABFBQ
+ * https://lab.civicrm.org/dev/translation/-/wikis/Administrator-Guide#native-gettext
  */
 // if (!defined('CIVICRM_GETTEXT_NATIVE')) {
 // define('CIVICRM_GETTEXT_NATIVE', 1);
@@ -471,19 +502,50 @@ define('CIVICRM_DEADLOCK_RETRIES', 3);
 // I do my own upgrades, don't want these snapshot tables.
 define('CIVICRM_UPGRADE_SNAPSHOT', FALSE);
 
-/**
- * Configure MySQL to throw more errors when encountering unusual SQL expressions.
- *
- * If undefined, the value is determined automatically. For CiviCRM tarballs, it defaults
- * to FALSE; for SVN checkouts, it defaults to TRUE.
- */
-// if (!defined('CIVICRM_MYSQL_STRICT')) {
-// define('CIVICRM_MYSQL_STRICT', TRUE );
-// }
-
 if (CIVICRM_UF === 'UnitTests') {
   if (!defined('CIVICRM_CONTAINER_CACHE')) define('CIVICRM_CONTAINER_CACHE', 'auto');
-  if (!defined('CIVICRM_MYSQL_STRICT')) define('CIVICRM_MYSQL_STRICT', true);
+}
+
+/**
+ * Whether to include the hash in config log filenames. Defaults to TRUE.
+ * Disable only if you have configured the logfiles to be outside the docroot
+ * using the civicrm.log path setting.
+ *
+ */
+// if (!defined('CIVICRM_LOG_HASH'))  {
+//   define('CIVICRM_LOG_HASH', FALSE );
+// }
+
+/**
+ * The maximum size a log file may be before it's rotated, in bytes.
+ * Set to 0 to disable rotation (only recommended if you have an
+ * external logrotate configuration).
+ */
+// if (!defined('CIVICRM_LOG_ROTATESIZE')) {
+//   define('CIVICRM_LOG_ROTATESIZE', 0 );
+// }
+
+/**
+ * Which directories should we exclude when scanning the codebase for things
+ * like extension .info files, or .html partials or .xml files etc. This needs
+ * to be a valid preg_match() pattern.
+ *
+ * If you do not define it, a pattern that excludes dirs starting with a dot is
+ * used, e.g. to exclude .git/). Adding suitable patterns here can vastly speed
+ * up your container rebuilds and cache flushes. The pattern is matched against
+ * the absolute path. Remember to use your system's DIRECTORY_SEPARATOR the
+ * examples below assume /
+ *
+ * The default excludes node_modules (can be huge), various CiviCRM dirs that
+ * are unlikely to have anything we need to scan inside, and (what could be
+ * your) Drupal's private file storage area. It does not exclude
+ * vendor but you are likely to see an improvement by adding it.
+ *
+ * See https://docs.civicrm.org/sysadmin/en/latest/setup/optimizations/#exclude-dirs-that-do-not-need-to-be-scanned
+ * and also discussion on including vendor (excluded) in https://lab.civicrm.org/dev/core/-/issues/2031
+ */
+if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' && !defined('CIVICRM_EXCLUDE_DIRS_PATTERN')) {
+  define('CIVICRM_EXCLUDE_DIRS_PATTERN', '@/(\.|node_modules|js/|css/|bower_components|packages/|sites/default/files/private)@');
 }
 
 /**
@@ -516,8 +578,7 @@ if (!defined('CIVICRM_CLEANURL')) {
   }
 }
 
-
-// make sure the memory_limit is at least 64 MB
+// make sure the memory_limit is at least 128 MB
 $memLimitString = trim(ini_get('memory_limit'));
 $memLimitUnit   = strtolower(substr($memLimitString, -1));
 $memLimit       = (int) $memLimitString;
@@ -530,7 +591,6 @@ switch ($memLimitUnit) {
 if ($memLimit >= 0 and $memLimit < 134217728 and PHP_SAPI !== 'cli') {
     ini_set('memory_limit', '128M');
 }
-
 {% if canonical_bare_url is not none %}
 {% include "files/" + canonical_bare_url + "/civicrm.settings.php-include.j2" ignore missing %}
 {% else %}
