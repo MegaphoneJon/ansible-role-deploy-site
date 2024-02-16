@@ -1,3 +1,10 @@
+# This probably isn't the ideal place for it - but D7 is EOL soon anyway
+- name: change webroot folder ownership
+  file:
+    path: "{{ webroot }}/.."
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+
 - name: Download Drupal 7
   command: "drush dl drupal-7 -y --destination={{ webroot }}/.. --drupal-project-rename=web"
   args:
