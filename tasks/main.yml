@@ -115,10 +115,9 @@
     path: "{{ webroot }}/htpasswd"
     name: "{{ basic_auth_name | default(default_basic_auth_name,true) }}"
     password: "{{ basic_auth_password | default(default_basic_auth_password,true) }}"
-    owner: root
+    owner: "{{ run_as_user }}"
     group: www-data
     mode: 0640
-  become_user: root
   when: env == 'Test'
   tags: htpasswd
 
