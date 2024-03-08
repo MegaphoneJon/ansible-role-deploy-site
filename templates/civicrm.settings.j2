@@ -239,13 +239,13 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  $civicrm_setting['domain']['mailing_backend'] = ['outBound_option' => '3'];
  $civicrm_setting['domain']['menubar_color'] = '#E22222';
  $civicrm_setting['domain']['menubar_color'] = '#E22222';
+{% endif %}
+{% if env != 'Live' %}
 {% if cms == 'Drupal8' %}
  define('CIVICRM_SMARTY3_AUTOLOAD_PATH', '{{ gitroot }}/vendor/civicrm/civicrm-packages/smarty3/vendor/autoload.php');
 {% else %}
  define('CIVICRM_SMARTY3_AUTOLOAD_PATH', '{{ civiroot }}/packages/smarty3/vendor/autoload.php');
 {% endif %}
-{% endif %}
-{% if env != 'Live' %}
  // Disable Sparkpost/Mandrill if present.
  $civicrm_setting['SparkPost Extension Settings']['sparkpost_apiKey'] = 'incorrectKey';
  $civicrm_setting['SparkPost Extension Settings']['sparkpost_useBackupMailer'] = 1;
