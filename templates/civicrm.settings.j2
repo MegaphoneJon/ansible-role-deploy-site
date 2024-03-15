@@ -230,7 +230,6 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  $civicrm_setting['domain']['environment'] = 'Staging';
  $civicrm_setting['domain']['menubar_color'] = '#E29522';
  $civicrm_setting['domain']['mailing_backend'] = ['outBound_option' => '2'];
- define('CIVICRM_TEMPLATE_COMPILE_CHECK', FALSE);
 {% elif env == 'Dev' %}
  $civicrm_setting['domain']['prevNextBackend'] = 'default';
  $civicrm_setting['domain']['environment'] = 'Development';
@@ -251,6 +250,8 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  $civicrm_setting['SparkPost Extension Settings']['sparkpost_useBackupMailer'] = 1;
  $civicrm_setting['Com.cividesk.email.sparkpost']['sparkpost_customCallbackUrl'] = 'https://www.local.local';
  $civicrm_setting['domain']['mandrill_smtp_settings'] = [];
+{% endif %}
+{% if env != 'Dev' %}
  define('CIVICRM_TEMPLATE_COMPILE_CHECK', FALSE);
 {% endif %}
  // Override the Temporary Files directory.
