@@ -4,7 +4,7 @@
     url: https://git.megaphonetech.com/api/v1/repos/{{ git_repo_owner }}/{{ git_repo_name }}/branches
     method: GET
     headers:
-      Authorization: token {{ lookup('passwordstore', 'megaphone/gogs/api') }}
+      Authorization: token {{ lookup('passwordstore', 'megaphone/gitea/api') }}
     body:
       name: "{{ git_repo_name }}"
       description: "Repo for {{ git_repo_name }}"
