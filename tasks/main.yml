@@ -80,11 +80,12 @@
 - name: Allow access to git repo for ansible user
   command: "git config --global --add safe.directory {{ gitroot }}"
   become_user: "{{ ansible_user }}"
+  when: run_as_user != ansible_user and 'mayfirst_ng_site' not in group_names
 
 # FIXME: Is this necessary? They already own the repo
-- name: Allow access to git repo for run_as_user
-  command: "git config --global --add safe.directory {{ gitroot }}"
-  become_user: "{{ run_as_user }}"
+# - name: Allow access to git repo for run_as_user
+#   command: "git config --global --add safe.directory {{ gitroot }}"
+#   become_user: "{{ run_as_user }}"
 
 - name: git add
   command: git add -A
@@ -108,7 +109,7 @@
 - name: Make sure we can use htpasswd module
   apt: "pkg=python3-passlib state=present"
   tags: htpasswd
-  when: run_as_user != ansible_user
+  when: run_as_user != ansible_user and 'mayfirst_ng_site' not in group_names
 
 - name: Add basic auth on test sites
   htpasswd:

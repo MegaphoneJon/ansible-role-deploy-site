@@ -12,8 +12,9 @@
     version: "{{ git_main_branch }}"
     umask: "{{ umask }}"
     track_submodules: no
+    key_file: "{{ ssh_key_location + '/id_ed25519' if ssh_key_location is defined }}"
+    ssh_opts: "{{ '-o UserKnownHostsFile=' + ssh_key_location + '/known_hosts' if ssh_key_location is defined }}"
   become_user: "{{ run_as_user }}"
-  become: yes
 
 - name: set an HTTP git push URL
   git_config:
@@ -22,16 +23,15 @@
     scope: local
     repo: "{{ gitroot }}"
   become_user: "{{ run_as_user }}"
-  become: yes
   when: (env == 'Test' or env == 'Live') and git_repo_name is not none
 
 - name: Composer install (D8)
-  composer:
+  community.general.composer:
     command: install
     working_dir: "{{ gitroot }}"
+    composer_executable: "{{ ansible_env.HOME + '/bin/composer' if 'mayfirst_ng_site' in group_names }}"
   when: cms == "Drupal8"
   become_user: "{{ run_as_user }}"
-  become: yes
 
 - name: Create CiviCRM uploads folder
   file:
@@ -46,7 +46,6 @@
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
     mode: 0660
-  become: "{{ 'no' if run_as_user == ansible_user else 'yes' }}"
   when: civicrm == 'Yes'
   tags: civicrm.settings.php
 
@@ -57,7 +56,6 @@
     mode: g+w
     recurse: yes
   become_user: root
-  become: yes
   when: civicrm == 'Yes'
 
 - name: Get table names for Views integration
@@ -84,7 +82,6 @@
     dest: "{{ webroot }}/sites/default/settings.php"
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
-  become: yes
   when: (cms == 'Drupal' or cms == 'Drupal8') and 'pantheon' not in group_names
   tags: settings.php
 
@@ -101,7 +98,6 @@
   shell: |
     wp config create --force --dbname='{{ cms_db_name }}' --dbuser='{{ db_user }}' --dbpass='{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}' {% if cms_table_prefix|default('blank', True) != 'blank' %}--dbprefix='{{ cms_table_prefix}}'{% endif %} --path='{{ webroot }}'
   become_user: "{{ run_as_user }}"
-  become: yes
   when: cms == 'WordPress' and 'pantheon' not in group_names
   tags: wp-config.php
 
@@ -121,7 +117,6 @@
         $_SERVER['HTTP_HOST'] ??= '';
       }
   become_user: "{{ run_as_user }}"
-  become: yes
   when: cms == 'WordPress' and 'pantheon' not in group_names
   tags: wp-config.php
 
@@ -136,7 +131,6 @@
       define( 'WPMS_ON', TRUE );
       define( 'WPMS_MAILER', 'mail' );
   become_user: "{{ run_as_user }}"
-  become: yes
   when: cms == 'WordPress' and 'pantheon' not in group_names and env == 'Dev'
   tags: wp-config.php
 
