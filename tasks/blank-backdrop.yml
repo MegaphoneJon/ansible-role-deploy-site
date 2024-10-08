@@ -1,0 +1,53 @@
+# This probably isn't the ideal place for it - but D7 is EOL soon anyway
+- name: change webroot folder ownership
+  file:
+    path: "{{ webroot }}/.."
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+
+- name: Download Backdrop
+  command: "bee download-core {{ webroot }}"
+  args:
+    creates: "{{ webroot }}/authorize.php"
+  become_user: "{{ run_as_user }}"
+
+- name: Install Backdrop with bee
+  command: >
+    bee install 
+    --auto
+    --root={{ webroot}}
+    --db-name={{ cms_db_name }}
+    --db-user={{ db_user }}
+    --db-pass={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql create=true length=32') }}
+    --username=admin
+    --password={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/admin create=true length=32') }}
+    --site-name="{{ site_title }}"
+    --db-url=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql create=true length=32') }}@localhost/{{ cms_db_name }}
+  args:
+    chdir: "{{ webroot }}"
+    creates: "{{ webroot }}/settings.php"
+  become_user: "{{ run_as_user }}"
+  notify:
+    - restart apache
+    - restart php-fpm
+
+- name: Check if Civi is already set up.
+  stat: "path={{ civiroot }}/Civi.php"
+  register: civi_installed
+  ignore_errors: true
+  become_user: "{{ run_as_user }}"
+
+- name: Download the latest Civi tarball
+  get_url:
+    url: https://download.civicrm.org/latest/civicrm-STABLE-backdrop.tar.gz
+    dest: /tmp/civicrm-STABLE-backdrop.tar.gz
+  when: civi_installed.stat.exists == false and civicrm == 'Yes'
+
+- name: Unarchive the tarball
+  unarchive:
+    src: /tmp/civicrm-STABLE-backdrop.tar.gz
+    dest: "{{ webroot }}/modules"
+    remote_src: yes
+    creates: "{{ civiroot }}/composer.json"
+  when: civi_installed.stat.exists == false and civicrm == 'Yes'
+  become_user: "{{ run_as_user }}"

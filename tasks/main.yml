@@ -52,6 +52,11 @@
   include_tasks: blank-drupal8.yml
   when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names) and cms == 'Drupal8' and 'git.megaphonetech.com' in git_repo_url
 
+# Build a new Backdrop site
+- name: Create fresh Drupal 7 site
+  include_tasks: blank-backdrop.yml
+  when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names) and cms == 'Backdrop' and 'git.megaphonetech.com' in git_repo_url
+
 - name: Set the .gitignore
   ansible.builtin.template:
     src: templates/{{ cms|lower }}-gitignore.j2
@@ -119,7 +124,7 @@
     owner: "{{ run_as_user }}"
     group: www-data
     mode: 0640
-  when: env == 'Test'
+  when: env == 'Test' and 'mayfirst_ng_site' not in group_names
   tags: htpasswd
 
 # was in postinstall-config, but then permissions don't get applied to it.
