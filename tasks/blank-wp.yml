@@ -10,6 +10,7 @@
   args:
     creates: "{{ webroot }}/wp-config.php"
   become_user: "{{ run_as_user }}"
+  tags: wp-config.php
 
 - name: Additional wp-config.php settings
   ansible.builtin.blockinfile:
