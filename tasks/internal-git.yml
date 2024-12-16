@@ -53,7 +53,7 @@
 - name: Get table names for Views integration
   command: "mysql -u{{ db_user }} -p{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }} {{ crm_db_name }} --skip-column-names --silent -e 'SHOW TABLES LIKE \"civi%\"'"
   register: civi_table_names
-  when: (cms == 'Drupal' cms == 'Backdrop') and civicrm == 'Yes'
+  when: (cms == 'Drupal' or cms == 'Backdrop') and civicrm == 'Yes'
   changed_when: false
   tags: settings.php
   ignore_errors: true
