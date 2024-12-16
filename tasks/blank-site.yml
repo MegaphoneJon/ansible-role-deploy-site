@@ -110,6 +110,13 @@
       repo: "{{ gitroot }}"
     become_user: "{{ run_as_user }}"
 
+  - name: set git remote fetch
+    git_config:
+      name: remote.origin.fetch
+      value: "+refs/heads/*:refs/remotes/origin/*"
+      scope: local
+      repo: "{{ gitroot }}"
+    become_user: "{{ run_as_user }}"
 
   - name: set an HTTP git push URL
     git_config:
