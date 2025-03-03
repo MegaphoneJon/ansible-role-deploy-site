@@ -1,0 +1,22 @@
+
+# misc
+.idea
+*~
+*.bak
+
+# composer lockfile and installed packages
+/composer.lock
+/vendor
+
+# site data
+/private
+/public
+/extensions
+
+# Ignore htpasswd file (on test sites)
+/htpasswd
+
+.DS_Store
+{% if canonical_bare_url is not none %}
+{% include "files/" + canonical_bare_url + "/gitignore-include.j2" ignore missing %}
+{% endif %}
