@@ -46,19 +46,18 @@
 - name: Run cv core:install
   command: "cv -n core:install --db=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}@localhost/{{ crm_db_name }} --cms-base-url={{ primary_url }}"
   args:
-    chdir: "{{ civiroot }}"
+    chdir: "{{ webroot }}"
     creates: "{{ civicrm_settings_php_path }}/civicrm.settings.php"
   when: civicrm == 'Yes'
   become_user: "{{ run_as_user }}"
 
-# This one contains any customizations we might want, like extensions directory.
 - name: Add civicrm.settings.php
   template:
     src: templates/civicrm.settings.j2
     dest: "{{ civicrm_settings_php_path }}/civicrm.settings.php"
     owner: "{{ run_as_user }}"
     group: "{{ run_as_user }}"
-    mode: 0660
+    mode: 0440
   when: civicrm == 'Yes'
   tags: civicrm.settings.php
 

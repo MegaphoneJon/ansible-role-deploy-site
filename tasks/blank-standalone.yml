@@ -1,0 +1,72 @@
+# Necessary because the parent directory isn't "web" so ownership is not the run_as_user
+- name: Allow access to git repo for run_as_user
+  command: "git config --global --add safe.directory {{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+
+
+- name: Check if 'main' branch exists
+  command: git for-each-ref refs/heads/main --format="%(refname)"
+  args:
+    chdir: "{{ gitroot }}"
+  register: main_branch_check
+  become_user: "{{ run_as_user }}"
+  changed_when: false
+  failed_when: false 
+
+- name: Clone standalone from Github
+  git:
+    repo: https://github.com/civicrm/civicrm-standalone.git
+    dest: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+  when: main_branch_check.stdout | trim == ""
+
+- name: Change branch name to "main"
+  command: git branch -m master main
+  args:
+    chdir: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+  when: main_branch_check.stdout | trim == ""
+
+- name: Composer install (D8)
+  composer:
+    command: install
+    working_dir: "{{ gitroot }}"
+    composer_executable: "{{ ansible_env.HOME + '/bin/composer' if 'mayfirst_ng_site' in group_names else '/usr/local/bin/composer' }}"
+    executable: "{{ php_path|default(omit) }}"
+  become_user: "{{ run_as_user }}"
+  
+# - name: Enable composer patching
+  # composer:
+    # command: config
+    # arguments: --no-plugins allow-plugins.cweagans/composer-patches true
+    # working_dir: "{{ gitroot }}"
+  # become_user: "{{ run_as_user }}"
+# 
+# - name: Enable Civi asset plugin
+  # composer:
+    # command: config
+    # arguments: --no-plugins allow-plugins.civicrm/civicrm-asset-plugin true
+    # working_dir: "{{ gitroot }}"
+  # become_user: "{{ run_as_user }}"
+# 
+# - name: Enable Civi downloads plugin
+  # composer:
+    # command: config
+    # arguments: --no-plugins allow-plugins.civicrm/composer-downloads-plugin true
+    # working_dir: "{{ gitroot }}"
+  # become_user: "{{ run_as_user }}"
+# 
+# - name: Enable Civi compile plugin
+  # composer:
+    # command: config
+    # arguments: --no-plugins allow-plugins.civicrm/composer-compile-plugin true
+    # working_dir: "{{ gitroot }}"
+  # become_user: "{{ run_as_user }}"
+# 
+# - name: Whitelist Civi compile plugins
+  # composer:
+    # command: config
+    # arguments: --json extra.compile-whitelist  '[ "civicrm/composer-compile-lib", "civicrm/civicrm-core" ]'
+    # working_dir: "{{ gitroot }}"
+  # become_user: "{{ run_as_user }}"
+

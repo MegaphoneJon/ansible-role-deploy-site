@@ -37,10 +37,15 @@
   when: (internal_repo == "1" and repos.json != None) or "git.megaphonetech.com" not in git_repo_url
   tags: civicrm.settings.php,settings.php,wp-config.php
 
+# Build a new standalone site
+- name: Create fresh standalone site
+  include_tasks: blank-standalone.yml
+  when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names)  and cms == 'Standalone' and 'git.megaphonetech.com' in git_repo_url
+
 # Build a new WP site
-# - name: Create fresh WordPress site
-#   include_tasks: blank-wp.yml
-#   when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names)  and cms == 'WordPress' and 'git.megaphonetech.com' in git_repo_url
+- name: Create fresh WordPress site
+  include_tasks: blank-wp.yml
+  when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names)  and cms == 'WordPress' and 'git.megaphonetech.com' in git_repo_url
 
 # Build a new D7 site
 - name: Create fresh Drupal 7 site
@@ -53,7 +58,7 @@
   when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names) and cms == 'Drupal8' and 'git.megaphonetech.com' in git_repo_url
 
 # Build a new Backdrop site
-- name: Create fresh Drupal 7 site
+- name: Create fresh Backdrop site
   include_tasks: blank-backdrop.yml
   when: (( internal_repo != "1" or repos.json == None) and 'pantheon' not in group_names) and cms == 'Backdrop' and 'git.megaphonetech.com' in git_repo_url
 
@@ -86,11 +91,6 @@
   command: "git config --global --add safe.directory {{ gitroot }}"
   become_user: "{{ ansible_user }}"
   when: run_as_user != ansible_user and 'mayfirst_ng_site' not in group_names
-
-# FIXME: Is this necessary? They already own the repo
-# - name: Allow access to git repo for run_as_user
-#   command: "git config --global --add safe.directory {{ gitroot }}"
-#   become_user: "{{ run_as_user }}"
 
 - name: git add
   command: git add -A
