@@ -30,6 +30,14 @@
  */
 global $civicrm_root, $civicrm_setting, $civicrm_paths;
 
+/*
+ * If there is an additional settings file, then include it
+ */
+$local_settings = __DIR__ . "/civicrm.settings.additional.php";
+if (file_exists($local_settings)) {
+  include $local_settings;
+}
+
 /**
  * Content Management System (CMS) Host:
  *
