@@ -225,6 +225,7 @@ if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
 if (!defined('CIVICRM_UF_BASEURL')) {
   define('CIVICRM_UF_BASEURL', '{{ primary_url }}');
 }
+
 /**
  * Specify a Smarty autoload file.
  * 
@@ -232,7 +233,6 @@ if (!defined('CIVICRM_UF_BASEURL')) {
  * un-comment the line describing the path. Note that this will become always enabled in
  * the near future - this opt-in setting is transitional. 
  */
-
 if (!defined('CIVICRM_SMARTY_AUTOLOAD_PATH') && getenv('CIVICRM_SMARTY_AUTOLOAD_PATH') === FALSE) {
   // If not set we should default the Smarty version to Smarty5 which is our stable version.
   // This will not work for all composer-based installs @todo.
