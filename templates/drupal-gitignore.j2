@@ -1,20 +1,24 @@
 # Ignore configuration files that may contain sensitive information.
-sites/*/settings*.php
-sites/*/civicrm.settings*.php
-!sites/*/civicrm.settings.additional.php
+/web/sites/*/settings*.php
+/web/sites/*/civicrm.settings*.php
+!/web/sites/*/civicrm.settings.additional.php
+**/.civicrm-staging
+/drush/drush.yml
+/web/sites/all/translations/*
+.env
+.vscode
 **/drushrc.php
-sites/all/translations/*
 **/civicrm/vendor/dompdf/dompdf/lib/fonts/*php
 **/civicrm/vendor/dompdf/dompdf/lib/fonts/*json
 !**/civicrm/vendor/dompdf/dompdf/lib/fonts/installed-fonts.dist.json
 
 # Ignore paths that contain user-generated content.
-sites/*/files
-!sites/*/files/civicrm
-sites/*/files/civicrm/*
-!sites/*/files/civicrm/ext
+/web/sites/*/files
+!/web/sites/*/files/civicrm
+/web/sites/*/files/civicrm/*
+!/web/sites/*/files/civicrm/ext
 
-sites/*/private
+/web/sites/*/private
 
 **/.DS_Store
 htpasswd
