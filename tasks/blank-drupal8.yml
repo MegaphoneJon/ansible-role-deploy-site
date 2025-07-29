@@ -1,7 +1,7 @@
 - name: composer create-project
   composer:
     command: create-project
-    arguments: drupal/recommended-project "{{ gitroot }}"
+    arguments: drupal/recommended-project "{{ gitroot }}" ^10.5
     working_dir: "{{ gitroot }}/.."
   become_user: "{{ run_as_user }}"
 
