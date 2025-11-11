@@ -44,7 +44,7 @@
   when: "{{ false if run_as_user == ansible_user else true }}"
 
 - name: Run cv core:install
-  command: "cv -n core:install --db=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}@localhost/{{ crm_db_name }} --cms-base-url={{ primary_url }}"
+  command: "cv -n core:install --db=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}@localhost/{{ crm_db_name }} --url={{ primary_url }}"
   args:
     chdir: "{{ webroot }}"
     creates: "{{ civicrm_settings_php_path }}/civicrm.settings.php"
