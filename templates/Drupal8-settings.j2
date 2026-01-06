@@ -822,6 +822,11 @@ $settings['config_sync_directory'] = '../config/sync';
 
 $settings['trusted_host_patterns'] = [
   '^{{ bare_url }}$',
+{% if server_aliases is not none -%}
+{% for alias in server_aliases.split(',') %}
+  '^{{ alias }}$',
+{% endfor %} 
+{% endif %}
 ];
 
 $settings['state_cache'] = TRUE;
