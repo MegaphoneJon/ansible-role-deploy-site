@@ -183,11 +183,18 @@ if (!defined('CIVICRM_LOGGING_DSN')) {
  *
  */
 
+{% if cms != 'Standalone' -%}
 define('CIVICRM_CMSDIR', '{{ webroot }}');
+{% endif -%}
+
 
 $civicrm_root = '{{ civiroot }}/';
 if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
+{% if cms == 'Standalone' %}
+  define('CIVICRM_TEMPLATE_COMPILEDIR', '{{ gitroot }}/private/cache/');
+{% else %}
   define('CIVICRM_TEMPLATE_COMPILEDIR', '{{ civicrm_files_path }}/templates_c/');
+{% endif %}
 }
 
 /**
@@ -276,6 +283,32 @@ if (!defined('CIVICRM_SMARTY_AUTOLOAD_PATH') && getenv('CIVICRM_SMARTY_AUTOLOAD_
 {% if env != 'Dev' %}
  define('CIVICRM_TEMPLATE_COMPILE_CHECK', FALSE);
 {% endif %}
+
+{% if cms == 'Standalone' %}
+{# FIXME: Are these all necessary? Pulled from standard standalone install #}
+ $civicrm_paths['cms.root']['path'] = '{{ webroot }}';
+ $civicrm_paths['cms.root']['url'] = '{{ primary_url }}';
+ $civicrm_paths['civicrm.private']['path'] = '{{ gitroot }}/private';
+ $civicrm_paths['civicrm.compile']['path'] = '{{ gitroot }}/private/cache';
+ $civicrm_paths['civicrm.log']['path'] = '{{ gitroot }}/private/log';
+ $civicrm_paths['civicrm.l10n']['path'] = '{{ gitroot }}/private/l10n';
+ $civicrm_paths['civicrm.files']['path'] = '{{ webroot }}/public';
+ $civicrm_paths['civicrm.files']['url'] = '{{ primary_url }}/public';
+ $civicrm_paths['civicrm.root']['path'] = '{{ gitroot }}/vendor/civicrm/civicrm-core';
+ // $civicrm_paths['civicrm.root']['url'] = '{{ primary_url }}/core';
+ $civicrm_paths['civicrm.vendor']['path'] = '{{ gitroot }}/vendor';
+ // $civicrm_paths['civicrm.vendor']['url'] = '{{ primary_url }}/core/vendor';
+ $civicrm_paths['civicrm.bower']['path'] = '{{ webroot }}/public/assets/core/bower_components';
+ $civicrm_paths['civicrm.bower']['url'] = '{{ primary_url }}/public/assets/core/bower_components';
+ $civicrm_paths['civicrm.packages']['path'] = '{{ gitroot }}/vendor/civicrm/civicrm-packages';
+ $civicrm_paths['civicrm.packages']['url'] = '{{ primary_url }}/public/assets/packages';
+ $civicrm_setting['domain']['customFileUploadDir'] = '{{ gitroot }}/private/attachment';
+ $civicrm_setting['domain']['uploadDir'] = '{{ gitroot }}/private/tmp';
+ $civicrm_setting['domain']['imageUploadDir'] = '{{ gitroot }}/web/public/media';
+ $civicrm_setting['domain']['imageUploadURL'] = '[cms.root]/public/media';
+ $civicrm_setting['domain']['extensionsDir'] = '{{ gitroot }}/web/ext';
+ $civicrm_setting['domain']['extensionsURL'] = '[cms.root]/ext';
+{% else %}
  // Override the Temporary Files directory.
  // $civicrm_setting['domain']['uploadDir'] = '/path/to/upload-dir';
 
@@ -314,7 +347,7 @@ if (!defined('CIVICRM_SMARTY_AUTOLOAD_PATH') && getenv('CIVICRM_SMARTY_AUTOLOAD_
 
  // Override the CMS root path defined by cmsRootPath.
  // define('CIVICRM_CMSDIR', '/path/to/install/root/');
-
+{% endif %}
 
 /**
  * If you are using any CiviCRM script in the bin directory that
