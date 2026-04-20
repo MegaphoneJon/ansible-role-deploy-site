@@ -5,19 +5,11 @@
   become_user: root
   when: civicrm == 'Yes'
 
-# FIXME: Shouldn't this be done by now?
-# - name: Create CiviCRM folder
-#   file:
-#     path: "{{ civiroot }}"
-#     state: directory
-#   when: civicrm == 'Yes'
-#   become_user: "{{ run_as_user }}"
-
 - name: Create CiviCRM uploads folder
   file:
     path: "{{ civicrm_settings_php_path }}"
     state: directory
-  when: civicrm == 'Yes'
+  when: civicrm == 'Yes' and cms != 'Standalone'
   become_user: "{{ run_as_user }}"
 
 - name: Create CiviCRM extensions/templates/php folder.
@@ -30,7 +22,7 @@
     - "{{ civicrm_custom_path }}"
     - "{{ civicrm_custom_path }}/templates"
     - "{{ civicrm_custom_path }}/extensions"
-  when: civicrm == 'Yes'
+  when: civicrm == 'Yes' and cms != 'Standalone'
   become_user: "{{ run_as_user }}"
 
 # FIXME: When can we do this? As root, yes. On May First, no. What about other nosudo situations? Probably not, huh.
@@ -41,7 +33,7 @@
     group: "{{ run_as_user }}"
     recurse: yes
     mode: ug=rwX
-  when: "{{ false if run_as_user == ansible_user else true }}"
+  when: "run_as_user != ansible_user"
 
 - name: Run cv core:install
   command: "cv -n core:install --db=mysql://{{ db_user }}:{{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/mysql') }}@localhost/{{ crm_db_name }} --url={{ primary_url }}"
@@ -76,7 +68,7 @@
     group: "{{ run_as_user }}"
     mode: 0660
   tags: settings.php
-  when: (cms == 'Drupal' or cms == 'Backdrop' or cms == 'Drupal8') and civicrm == 'Yes'
+  when: (cms == 'Drupal' or cms == 'Backdrop') and civicrm == 'Yes'
 
 - block:
   - name: Create a blank repo

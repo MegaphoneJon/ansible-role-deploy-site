@@ -27,46 +27,81 @@
   become_user: "{{ run_as_user }}"
   when: main_branch_check.stdout | trim == ""
 
-- name: Composer install (D8)
+- name: Set the remote to the actual git repo
+  command: git remote set-url origin {{ git_repo_url }}
+  args:
+    chdir: "{{ gitroot }}"
+  become_user: "{{ run_as_user }}"
+
+- name: Create the web folder
+  file:
+    path: "{{ webroot }}"
+    state: directory
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+    mode: '0770'
+
+- name: Move the existing public/, index.php, .htaccess and the ext/ files and directories under the webroot.
+  command: "git mv {{ item }} {{ webroot }}/"
+  args:
+    chdir: "{{ gitroot }}"
+    creates: "{{ webroot }}/{{ item }}"
+  with_items:
+    - public
+    - index.php
+    - .htaccess
+    - ext
+  become_user: "{{ run_as_user }}"
+
+- name: Set the appRootPath to reflect the nested structure of the standalone codebase.
+  lineinfile:
+    path: "{{ webroot }}/index.php"
+    search_string: '$appRootPath ='
+    line: "$appRootPath = implode(DIRECTORY_SEPARATOR, [__DIR__, '..']);"
+
+- name: Update the asset paths in composer.json
+  replace:
+    path: "{{ gitroot }}/composer.json"
+    regexp: 'public\/assets'
+    replace: 'web/public/assets'
+    
+- name: Get the latest CiviCRM version number
+  local_action:
+    module: uri
+    url: https://latest.civicrm.org/stable.php
+    return_content: yes
+  run_once: true
+  register: civi_ver
+  become: no
+
+- name: Update the CiviCRM version in composer.json
+  composer:
+    command: require
+    working_dir: "{{ gitroot }}"
+    arguments: "civicrm/civicrm-core:'{{ civi_ver.content }}' civicrm/civicrm-packages:'{{ civi_ver.content }}'"
+  become_user: "{{ run_as_user }}"
+
+- name: git add
+  command: git add -A
+  args:
+    chdir: "{{ gitroot }}"
+  register: add_result
+  changed_when: add_result.stdout != ''
+  become_user: "{{ run_as_user }}"
+
+- name: git commit
+  command: git commit -m "Nested webroot structure for standalone"
+  args:
+    chdir: "{{ gitroot }}"
+  register: commit_result
+  changed_when: commit_result.rc == 0 or 'nothing to commit, working tree clean' in commit_result.stdout
+  failed_when: 'commit_result.rc != 0 and not "nothing to commit, working tree clean" in commit_result.stdout_lines'
+  become_user: "{{ run_as_user }}"
+
+- name: Composer install (standalone - takes at least 3 minutes)
   composer:
     command: install
     working_dir: "{{ gitroot }}"
     composer_executable: "{{ ansible_env.HOME + '/bin/composer' if 'mayfirst_ng_site' in group_names else '/usr/local/bin/composer' }}"
     executable: "{{ php_path|default(omit) }}"
   become_user: "{{ run_as_user }}"
-  
-# - name: Enable composer patching
-  # composer:
-    # command: config
-    # arguments: --no-plugins allow-plugins.cweagans/composer-patches true
-    # working_dir: "{{ gitroot }}"
-  # become_user: "{{ run_as_user }}"
-# 
-# - name: Enable Civi asset plugin
-  # composer:
-    # command: config
-    # arguments: --no-plugins allow-plugins.civicrm/civicrm-asset-plugin true
-    # working_dir: "{{ gitroot }}"
-  # become_user: "{{ run_as_user }}"
-# 
-# - name: Enable Civi downloads plugin
-  # composer:
-    # command: config
-    # arguments: --no-plugins allow-plugins.civicrm/composer-downloads-plugin true
-    # working_dir: "{{ gitroot }}"
-  # become_user: "{{ run_as_user }}"
-# 
-# - name: Enable Civi compile plugin
-  # composer:
-    # command: config
-    # arguments: --no-plugins allow-plugins.civicrm/composer-compile-plugin true
-    # working_dir: "{{ gitroot }}"
-  # become_user: "{{ run_as_user }}"
-# 
-# - name: Whitelist Civi compile plugins
-  # composer:
-    # command: config
-    # arguments: --json extra.compile-whitelist  '[ "civicrm/composer-compile-lib", "civicrm/civicrm-core" ]'
-    # working_dir: "{{ gitroot }}"
-  # become_user: "{{ run_as_user }}"
-
