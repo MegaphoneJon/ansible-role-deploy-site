@@ -70,6 +70,10 @@
   tags: settings.php
   when: (cms == 'Drupal' or cms == 'Backdrop') and civicrm == 'Yes'
 
+- name: Set a password on Standalone
+  command: "cv api4 User.update +v 'password={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/admin create=true length=32') }}' +w 'id = 1'"
+  when: cms == 'Standalone'
+
 - block:
   - name: Create a blank repo
     command: "git init --initial-branch={{ git_main_branch }}"

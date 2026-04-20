@@ -60,10 +60,10 @@
     line: "$appRootPath = implode(DIRECTORY_SEPARATOR, [__DIR__, '..']);"
 
 - name: Update the asset paths in composer.json
-  replace:
+  lineinfile:
     path: "{{ gitroot }}/composer.json"
-    regexp: 'public\/assets'
-    replace: 'web/public/assets'
+    search_string: '"path": "public/assets"'
+    replace: '"path": "web/public/assets"'
     
 - name: Get the latest CiviCRM version number
   local_action:
