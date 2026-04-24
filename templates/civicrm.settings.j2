@@ -302,11 +302,11 @@ if (!defined('CIVICRM_SMARTY_AUTOLOAD_PATH') && getenv('CIVICRM_SMARTY_AUTOLOAD_
  $civicrm_paths['civicrm.bower']['url'] = '{{ primary_url }}/public/assets/core/bower_components';
  $civicrm_paths['civicrm.packages']['path'] = '{{ gitroot }}/vendor/civicrm/civicrm-packages';
  $civicrm_paths['civicrm.packages']['url'] = '{{ primary_url }}/public/assets/packages';
- $civicrm_setting['domain']['customFileUploadDir'] = '{{ gitroot }}/private/attachment';
- $civicrm_setting['domain']['uploadDir'] = '{{ gitroot }}/private/tmp';
- $civicrm_setting['domain']['imageUploadDir'] = '{{ gitroot }}/web/public/media';
+ $civicrm_setting['domain']['customFileUploadDir'] = '[civicrm.private]/attachment';
+ $civicrm_setting['domain']['uploadDir'] = '[civicrm.private]/tmp';
+ $civicrm_setting['domain']['imageUploadDir'] = '[civicrm.files]/media';
  $civicrm_setting['domain']['imageUploadURL'] = '[cms.root]/public/media';
- $civicrm_setting['domain']['extensionsDir'] = '{{ gitroot }}/web/ext';
+ $civicrm_setting['domain']['extensionsDir'] = '[cms.root]/ext';
  $civicrm_setting['domain']['extensionsURL'] = '[cms.root]/ext';
 {% else %}
  // Override the Temporary Files directory.
