@@ -70,11 +70,8 @@
   tags: settings.php
   when: (cms == 'Drupal' or cms == 'Backdrop') and civicrm == 'Yes'
 
-- name: Fix the authx header cred options
-  command: "cv api4 Setting.set +v authx_header_cred="
-
 - name: Set a password on Standalone
-  command: "cv api4 User.update +v 'uf_name={{ admin_email }}' +v 'password={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/admin create=true length=32') }}' +w 'id = 1'"
+  command: "cv --cwd={{ webroot }} api4 User.update +v 'uf_name={{ admin_email }}' +v 'password={{ lookup('passwordstore', client + '/' + hostname + '/' + bare_url + '/admin create=true length=32') }}' +w 'id = 1'"
   when: cms == 'Standalone'
 
 - block:
