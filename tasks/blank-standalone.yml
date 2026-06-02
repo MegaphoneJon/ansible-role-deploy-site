@@ -66,8 +66,8 @@
     replace: '"path": "web/public/assets"'
     
 - name: Get the latest CiviCRM version number
-  local_action:
-    module: uri
+  local_action: uri
+  args:
     url: https://latest.civicrm.org/stable.php
     return_content: yes
   run_once: true
@@ -102,6 +102,6 @@
   composer:
     command: install
     working_dir: "{{ gitroot }}"
-    composer_executable: "{{ ansible_env.HOME + '/bin/composer' if 'mayfirst_ng_site' in group_names else '/usr/local/bin/composer' }}"
+    composer_executable: "{{ ansible_facts.env.HOME + '/bin/composer' if 'mayfirst_ng_site' in group_names else '/usr/local/bin/composer' }}"
     executable: "{{ php_path|default(omit) }}"
   become_user: "{{ run_as_user }}"
