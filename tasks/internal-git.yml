@@ -104,6 +104,7 @@
       define( 'HABITAT_ENVIRONMENT', '{{ env }}' );
       define( 'WP_CACHE', "{{ (env == 'Dev') | ternary(false, true) }}" );
       define( 'WPO_ADVANCED_CACHE', "{{ (env == 'Dev') | ternary(false, true) }}" );
+      define( 'DISABLE_WP_CRON', true);
       // For WP multisites:
       if (PHP_SAPI === 'cli') {
         $_SERVER['HTTP_HOST'] ??= '';
