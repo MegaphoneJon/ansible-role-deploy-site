@@ -274,11 +274,12 @@ if (!defined('CIVICRM_SMARTY_AUTOLOAD_PATH') && getenv('CIVICRM_SMARTY_AUTOLOAD_
  $civicrm_setting['domain']['menubar_color'] = '#E22222';
 {% endif %}
 {% if env != 'Live' %}
- // Disable Sparkpost/Mandrill if present.
+ // Disable Sparkpost/Mandrill/SES Mailer if present.
  $civicrm_setting['SparkPost Extension Settings']['sparkpost_apiKey'] = 'incorrectKey';
  $civicrm_setting['SparkPost Extension Settings']['sparkpost_useBackupMailer'] = 1;
  $civicrm_setting['Com.cividesk.email.sparkpost']['sparkpost_customCallbackUrl'] = 'https://www.local.local';
  $civicrm_setting['domain']['mandrill_smtp_settings'] = [];
+ $civicrm_setting['domain']['ses_access_key'] = 'incorrectKey';
 {% endif %}
 {% if env != 'Dev' %}
  define('CIVICRM_TEMPLATE_COMPILE_CHECK', FALSE);
