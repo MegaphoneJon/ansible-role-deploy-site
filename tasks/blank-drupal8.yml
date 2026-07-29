@@ -7,9 +7,9 @@
 
 - name: escape this JSON
   set_fact:
-    file_mapping: "{{ {'[web-root]/.htaccess': false, '[web-root]/robots.txt': false} | to_json }}"
+    file_mapping: "{{ {'[web-root]/.htaccess': false, '[web-root]/robots.txt': false}, '[web-root]/sites/default/default.settings.php' | to_json }}"
 
-- name: Don't touch .htaccess or robots.txt
+- name: Don't touch .htaccess or robots.txt or default.settings.php
   composer:
     command: config
     arguments: "--json extra.drupal-scaffold.file-mapping '{{ file_mapping }}'"
