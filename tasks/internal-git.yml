@@ -67,6 +67,13 @@
 #TODO: Create a settings template for Backdrop
 #TODO: Create the config folders for Backdrop/D8 with appropriate owner/perms
 # config/active, config/staging, both owned/writable by run_as_user
+- name: Create sites/default
+  file:
+    path: "{{ webroot }}/sites/default"
+    state: directory
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+  when: (cms == 'Drupal' or cms == 'Drupal8')
 
 - name: Add settings.php - all Drupals
   template:
