@@ -1,12 +1,35 @@
 # Ignore configuration files that may contain sensitive information.
-/web/sites/*/settings*.php
-/web/sites/*/civicrm.settings*.php
+/web/sites/*/*settings*.php
+/web/sites/*/*services*.yml
 !/web/sites/*/civicrm.settings.additional.php
 **/.civicrm-staging
 /drush/drush.yml
 /web/sites/all/translations/*
 .env
+.envrc
+/.env.local
+/.env.*.local
 .vscode
+
+# --- Drupal runtime & writable paths ---
+/web/sites/*/files/
+
+/backups/
+/private/
+/config/*.staging/
+/config/*.tmp/
+
+# --- Cache, logs, tmp ---
+/web/sites/*/php
+/web/sites/*/translations
+/.cache/
+/.tmp/
+/logs/
+
+# --- Node/Front-end (if used in themes) ---
+/web/themes/custom/**/node_modules/
+/web/themes/custom/**/dist/
+/web/themes/custom/**/.cache/
 
 # Ignore paths that contain user-generated content.
 /web/sites/*/files
@@ -20,12 +43,14 @@
 /web/themes/contrib/
 /web/profiles/contrib/
 /web/libraries/
-/private
 
 # Ignore Megaphone stuff.
 /sql-dumps/*
 /tmp/*
+*.swp
+*.swo
 **/.DS_Store
+Thumbs.db
 /web/htpasswd
 {% if canonical_bare_url is not none %}
 {% include "files/" + canonical_bare_url + "/gitignore-include.j2" ignore missing %}
