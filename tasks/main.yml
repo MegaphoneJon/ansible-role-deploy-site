@@ -122,7 +122,7 @@
 - name: Make sure we can use htpasswd module
   apt: "pkg=python3-passlib state=present"
   tags: htpasswd
-  when: run_as_user != ansible_user and 'mayfirst_ng_site' not in group_names
+  when: (env == 'Test' and 'mayfirst_ng_site' not in group_names) or basic_auth_name is defined
 
 - name: Add basic auth on test sites
   htpasswd:
@@ -132,7 +132,7 @@
     owner: "{{ run_as_user }}"
     group: www-data
     mode: 0640
-  when: env == 'Test' and 'mayfirst_ng_site' not in group_names
+  when: (env == 'Test' and 'mayfirst_ng_site' not in group_names) or basic_auth_name is defined
   tags: htpasswd
 
 # was in postinstall-config, but then permissions don't get applied to it.
