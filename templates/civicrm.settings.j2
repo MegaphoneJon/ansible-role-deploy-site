@@ -283,6 +283,9 @@ if (!defined('CIVICRM_SMARTY_AUTOLOAD_PATH') && getenv('CIVICRM_SMARTY_AUTOLOAD_
 {% endif %}
 {% if env != 'Dev' %}
  define('CIVICRM_TEMPLATE_COMPILE_CHECK', FALSE);
+
+ // Disable automatic download / installation of extensions
+ $civicrm_setting['domain']['ext_repo_download'] = false;
 {% endif %}
 
 {% if cms == 'Standalone' %}
@@ -307,8 +310,6 @@ if (!defined('CIVICRM_SMARTY_AUTOLOAD_PATH') && getenv('CIVICRM_SMARTY_AUTOLOAD_
  $civicrm_setting['domain']['uploadDir'] = '[civicrm.private]/tmp';
  $civicrm_setting['domain']['imageUploadDir'] = '[civicrm.files]/media';
  $civicrm_setting['domain']['imageUploadURL'] = '[cms.root]/public/media';
- $civicrm_setting['domain']['extensionsDir'] = '[cms.root]/ext';
- $civicrm_setting['domain']['extensionsURL'] = '[cms.root]/ext';
 {% else %}
  // Override the Temporary Files directory.
  // $civicrm_setting['domain']['uploadDir'] = '/path/to/upload-dir';
@@ -324,9 +325,10 @@ if (!defined('CIVICRM_SMARTY_AUTOLOAD_PATH') && getenv('CIVICRM_SMARTY_AUTOLOAD_
 
  // Override the Custom php path directory.
  $civicrm_setting['domain']['customPHPPathDir'] = '[cms.root]/{{ civicrm_custom_path }}/';
+{% endif %}
 
  // Override the extensions directory.
- $civicrm_setting['domain']['extensionsDir'] = '[cms.root]/{{ civicrm_custom_path }}/extensions/';
+ $civicrm_setting['domain']['extensionsDir'] = '[cms.root]/{{ extensions_path }}/';
 
  // Override the resource url
  // $civicrm_setting['domain']['userFrameworkResourceURL'] = 'http://example.com/example-resource-url/';
@@ -338,17 +340,16 @@ if (!defined('CIVICRM_SMARTY_AUTOLOAD_PATH') && getenv('CIVICRM_SMARTY_AUTOLOAD_
  // $civicrm_setting['domain']['customCSSURL'] = 'http://example.com/example-css-url' ;
 
  // Override the extensions resource URL
- $civicrm_setting['domain']['extensionsURL'] = '[cms.root]/{{ civicrm_custom_path }}/extensions';
+ $civicrm_setting['domain']['extensionsURL'] = '[cms.root]/{{ extensions_path }}';
 
  // Disable display of Community Messages on home dashboard
  // $civicrm_setting['domain']['communityMessagesUrl'] = false;
 
  // Disable automatic download / installation of extensions
- $civicrm_setting['domain']['ext_repo_download'] = false;
+ // $civicrm_setting['domain']['ext_repo_url'] = false;
 
  // Override the CMS root path defined by cmsRootPath.
  // define('CIVICRM_CMSDIR', '/path/to/install/root/');
-{% endif %}
 
 /**
  * If you are using any CiviCRM script in the bin directory that
