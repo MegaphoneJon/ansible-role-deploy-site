@@ -26,7 +26,7 @@
 
 - name: Create extensions directory
   file:
-    path: "{{ extensions_path }}"
+    path: "{{ webroot }}/{{ extensions_path }}"
     state: directory
   when: civicrm == 'Yes'
   become_user: "{{ run_as_user }}"

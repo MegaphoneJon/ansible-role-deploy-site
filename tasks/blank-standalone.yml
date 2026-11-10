@@ -62,8 +62,8 @@
 - name: Update the asset paths in composer.json
   lineinfile:
     path: "{{ gitroot }}/composer.json"
-    search_string: '"path": "public/assets"'
-    replace: '"path": "web/public/assets"'
+    search_string: '"path": "public/assets",'
+    line: '"path": "web/public/assets",'
     
 - name: Get the latest CiviCRM version number
   local_action: uri
